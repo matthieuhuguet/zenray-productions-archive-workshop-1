@@ -1,0 +1,37 @@
+# tmp-zenray-assets-v2 : feedback, prompts and rules (append only)
+
+## Prompt log
+- 2026-10-02 12:41 : COMMENCE PAR LE REWORK DU MOCKUP DE ZENRAY ASSETS POUR SAVOIR OU VONT LES CHOSES POUR A TERME LOAD UNLOAD UN PROJET COMME SUR GITHUB. Pas besoin de ranger en local mais le cloud doit être parfaitement rangé. Pour tous mes projets 3D et game, et en soi tout. Lance en localhost avec sliders et HDA logic. Simplifie au maximum, utilisation tous les jours. Carte blanche pour architecture, code, watcher, dashboard et publication sur ZenRayProgress avec push. Quatre emplacements : TMP, Memory, ZenRayHoudini, ZenRayShards. Un feedback global par projet, chaque prompt et itération immédiatement notés automatiquement. Unifier feedback et feedback-stack en gardant une seule méthode. Fix le skill en append only. Lance une multi équipe de sous-agents. Cas réels : Louisiana Bayou, Environnement japonais, Ceramic Tiles.
+
+## Order of work
+
+## Standing rules
+
+## Log
+
+## 2 October 2026 : Précision du protocole réutilisable
+
+- « LE BUT c'est pas de simplement ranger une FOIS c'est de créer le protocole ultime pour l'utiliser à l'avenir. » (2 October 2026)
+- Source du prompt intégral à préserver : `/Users/zenray/.codex/attachments/6143c397-e855-4319-ac46-8d7458edf4ad/Pasted text.txt`. (2 October 2026)
+- Un nouveau projet reçoit une identité stable et une capture automatique des prompts et itérations ; seule une capture exécutée et vérifiée peut être déclarée active. (2 October 2026)
+
+## 2 October 2026, 13:04:11 +0200 : Prompt
+
+<!-- feedback-event:23c12994b99dd71453496f452858ef67100a4a8eeda208981769f8f68064bcf9 (2 October 2026, 13:04:11 +0200) -->
+- Project: tmp-zenray-assets-v2; kind: prompt. (2 October 2026, 13:04:11 +0200)
+
+> ZenRay Assets centralise une vue parfaite design, harmonieuse et ultra utile, avec LES FICHIERS DU PROJET, L’HISTORIQUE DU PROJET ET SA CHRONOLOGIE (progress like), TOUS LES FEEDBACKS / PROMPTS, idéalement le même puisque même projet, voire chaque projet devient un skill zenray-<nom-du-projet>. Les fichiers locaux tmp / zenrayhoudini / zrs / memory et les autres choses déjà évoquées. Note prompt-stacking. Continue. (2 October 2026, 13:04:11 +0200)
+
+## 2 October 2026, 13:10:39 +0200 : Prompt
+
+<!-- feedback-event:5686d767e726a95ce72250e1156f10a45d4f58b69df0e1eb09c016f3d6c0d679 (2 October 2026, 13:10:39 +0200) -->
+- Project: tmp-zenray-assets-v2; kind: prompt. (2 October 2026, 13:10:39 +0200)
+
+> 52 Go ? ça m’étonnerait, c’est car tu prends le dossier unreal à chaque fois. Il faut trouver une solution exception pour ça. JE TE VOIS TOUJOURS PAS BOSSER SUR LE BUT. (2 October 2026, 13:10:39 +0200)
+
+## 2 October 2026, 13:14:51 +0200 : Historical source
+
+<!-- feedback-event:7a7efef4282be11f183a96f86a5200738584d3988e0d673532e23abf690b52e8 (2 October 2026, 13:14:51 +0200) -->
+- Project: zenray-assets-v2; kind: provenance. (2 October 2026, 13:14:51 +0200)
+
+> Future feedback is recorded in [FEEDBACK.md](/Users/zenray/.claude/Memory1/Projects/zenray-assets-v2/FEEDBACK.md). (2 October 2026, 13:14:51 +0200)

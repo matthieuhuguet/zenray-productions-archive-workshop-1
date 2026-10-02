@@ -1,0 +1,1290 @@
+{
+  "v": 3,
+  "projets": [
+    {
+      "id": "louisiana-bayou-church-components",
+      "categorie": "3D",
+      "nom": "Louisiana Bayou Church : 3 Composants HDA",
+      "depose": "2026-09-10",
+      "resume": "Trois composants procéduraux Houdini pour la chapelle du bayou (Armature, Façade en bois, Perron à marches). Génération native des UVs par sweep à texel density normalisée de 4.0 px/cm, variation procédurale vectorisée par connectivité de planches sans boucle For-Each, et enregistrement live viewport par automation système OBS.",
+      "vitrine": [
+        {
+          "titre": "Composant 01 : Armature en poutres",
+          "note": "22 poutres procédurales, géométrie de soutien complète, 3692 primitives avec UVs automatiques et variation de fibre."
+        },
+        {
+          "titre": "Composant 02 : Façade en bois",
+          "note": "42 planches modulaires, angles à 45 degrés sans distorsion UV, texel density calibrée et décalage V procédural."
+        },
+        {
+          "titre": "Composant 03 : Perron à marches",
+          "note": "Marches et rambarde procédurales adaptées à la hauteur d entrée, 910 primitives avec coordonnées de texture propres."
+        }
+      ],
+      "composants": [
+        {
+          "groupe": "Composants HDA Chapelle",
+          "nom": "Component_Armature",
+          "court": "Génération procédurale de la structure porteuse en bois, rampants et montants, avec UVs natives de sweep.",
+          "moteur": "Houdini 22 SOP",
+          "poids": "3692 prims",
+          "date": "2026-09-10"
+        },
+        {
+          "groupe": "Composants HDA Chapelle",
+          "nom": "Component_WoodFacade",
+          "court": "Bardage procédural complet avec découpes de toiture à 45 degrés et décalage aléatoire de texture vectorisé.",
+          "moteur": "Houdini 22 SOP",
+          "poids": "440 prims",
+          "date": "2026-09-10"
+        },
+        {
+          "groupe": "Composants HDA Chapelle",
+          "nom": "Component_PorchStairs",
+          "court": "Escalier et palier d accès au perron avec rambardes et marches paramétriques à texel density 4.0.",
+          "moteur": "Houdini 22 SOP",
+          "poids": "910 prims",
+          "date": "2026-09-10"
+        },
+        {
+          "groupe": "Pipelines et Enregistrement",
+          "nom": "Automation Enregistrement OBS Viewport",
+          "court": "Pilotage AppleScript UI sans prise de contrôle souris, bouclage interactif HOM PySide6 à 25 fps et recadrage 9:16 ffmpeg.",
+          "moteur": "Python, AppleScript, OBS",
+          "poids": "1080x1920",
+          "date": "2026-09-10"
+        }
+      ]
+    },
+    {
+      "id": "skill-atelier",
+      "categorie": "Skills",
+      "nom": "zenray-html-photoshop-pdf-hda-socialmedia",
+      "depose": "2026-09-05",
+      "resume": "L'atelier qui produit les posts, les carrousels, les visuels et les PDF de ZenRay. Un gabarit s'y instancie en une commande plutôt que de se réécrire, et chaque erreur déjà payée y est consignée pour ne pas se rejouer.",
+      "vitrine": [
+        {
+          "image": "/zr-assets/02-galerie.webp",
+          "titre": "Direction Galerie",
+          "note": "Éditorial et épuré. C'est elle qui habille cette page et la barre latérale."
+        },
+        {
+          "image": "/zr-assets/01-atelier.webp",
+          "titre": "Direction Atelier",
+          "note": "Liquid Glass poussé, la plus proche du système existant."
+        },
+        {
+          "image": "/zr-assets/03-studio.webp",
+          "titre": "Direction Studio",
+          "note": "Sombre et dense, pensée pour retrouver cent pièces d'un coup d'œil."
+        },
+        {
+          "image": "/zr-assets/04-salon.webp",
+          "titre": "Direction Salon",
+          "note": "La synthèse entre les deux premières."
+        }
+      ],
+      "composants": [
+        {
+          "groupe": "Ateliers",
+          "nom": "Atelier heavy",
+          "court": "Cadrage affine, ordre des images, module photo complet, calques de texte, bordure liée et grille de composition, dans un seul écran. L'aperçu et le rendu final partagent le même calcul.",
+          "moteur": "Navigateur, WebGL 2",
+          "poids": "115,2 Kio",
+          "date": "2026-09-05"
+        },
+        {
+          "groupe": "Ateliers",
+          "nom": "Atelier light",
+          "court": "Le cadrage seul. Aucun WebGL, donc il s'ouvre en double-cliquant, sans dépendre d'un process qui tourne.",
+          "moteur": "Navigateur, CSS",
+          "poids": "72,8 Kio",
+          "date": "2026-09-05"
+        },
+        {
+          "groupe": "Ateliers",
+          "nom": "Rendu et contrôles de sortie",
+          "court": "Rend chaque planche, vérifie ses dimensions au pixel et reconvertit sous huit mégaoctets quand Instagram refuserait le fichier.",
+          "moteur": "Shell, Chromium",
+          "poids": "3,4 Kio",
+          "date": "2026-09-03"
+        },
+        {
+          "groupe": "Bibliothèque de designs",
+          "nom": "Registre des designs",
+          "court": "Le catalogue des mises en page déjà validées, rangées en articles, sections, pages et composants, avec son index. C'est lui qu'on instancie plutôt que de repartir d'une page blanche.",
+          "moteur": "HTML, JSON",
+          "poids": "24,5 Kio",
+          "date": "2026-09-05"
+        },
+        {
+          "groupe": "Bibliothèque de designs",
+          "nom": "Directions ZenRay Assets",
+          "court": "Quatre directions visuelles complètes pour la barre latérale et cette page, plus leur index de comparaison.",
+          "moteur": "HTML",
+          "poids": "874,9 Kio",
+          "date": "2026-09-05"
+        },
+        {
+          "groupe": "Bibliothèque de designs",
+          "nom": "Canevas de composition",
+          "court": "Format, polices, couleurs et styles partagés d'une planche. Aucun littéral dans un gabarit, tout descend d'ici.",
+          "moteur": "CSS",
+          "poids": "2,4 Kio",
+          "date": "2026-09-03"
+        },
+        {
+          "groupe": "Bibliothèque de designs",
+          "nom": "Effet brume",
+          "court": "Le carton titre dont les bords sont mangés comme imprimés dans la brume. Turbulence, déplacement, double halo.",
+          "moteur": "CSS, filtre SVG",
+          "poids": "1,8 Kio",
+          "date": "2026-09-03"
+        },
+        {
+          "groupe": "Bibliothèque de designs",
+          "nom": "Planche d'exemple",
+          "court": "Le point de départ d'un carrousel, prêt à instancier.",
+          "moteur": "HTML",
+          "poids": "1,1 Kio",
+          "date": "2026-09-03"
+        },
+        {
+          "groupe": "Bibliothèque de designs",
+          "nom": "Asset de texte",
+          "court": "Une ligne de texte sur fond transparent, rendue à la résolution de sortie puis rognée sur son glyphe.",
+          "moteur": "HTML",
+          "poids": "1,3 Kio",
+          "date": "2026-09-03"
+        },
+        {
+          "groupe": "Bibliothèque de designs",
+          "nom": "Catalogue des polices",
+          "court": "Chaque police installée, rendue avec son chemin exact prêt à copier.",
+          "moteur": "HTML",
+          "poids": "81,5 Kio",
+          "date": "2026-09-03"
+        },
+        {
+          "groupe": "Composants d'interface",
+          "nom": "Thème, verre et polices servies",
+          "court": "Un seul thème clair par défaut, la matière Liquid Glass relevée dans le produit, les deux familles variables embarquées, et les routes d'enregistrement.",
+          "moteur": "CSS, JavaScript",
+          "poids": "751,5 Kio",
+          "date": "2026-09-03"
+        },
+        {
+          "groupe": "Composants d'interface",
+          "nom": "Éditeur de post",
+          "court": "La légende s'écrit dans l'atelier, comptée en points de code et non en unités UTF-16.",
+          "moteur": "JavaScript",
+          "poids": "355,5 Kio",
+          "date": "2026-09-05"
+        },
+        {
+          "groupe": "Composants d'interface",
+          "nom": "Module de réglages photo",
+          "court": "Levels, couleur sélective, lumière, saturation, filtres, vignette et grain. Shader original, parité avec le rendu final mesurée à un écart nul.",
+          "moteur": "WebGL 2",
+          "poids": "16,0 Kio",
+          "date": "2026-09-03"
+        },
+        {
+          "groupe": "Cooks et générateurs",
+          "nom": "Instancier un atelier",
+          "court": "Un nouveau lot d'images devient un atelier complet en une commande, mesurée à neuf centièmes de seconde et zéro token.",
+          "moteur": "Python",
+          "poids": "20,6 Kio",
+          "date": "2026-09-05"
+        },
+        {
+          "groupe": "Cooks et générateurs",
+          "nom": "Instancier un design",
+          "court": "Le même geste appliqué au registre des designs.",
+          "moteur": "Node",
+          "poids": "3,4 Kio",
+          "date": "2026-09-05"
+        },
+        {
+          "groupe": "Cooks et générateurs",
+          "nom": "Ouvrir un projet",
+          "court": "Canevas, script de rendu et première planche, prêts à éditer.",
+          "moteur": "Shell",
+          "poids": "1,5 Kio",
+          "date": "2026-09-03"
+        },
+        {
+          "groupe": "Cooks et générateurs",
+          "nom": "Déposer un projet ici",
+          "court": "Mesure un projet sur le disque et rend cette page. Un chemin absent ne produit aucune ligne.",
+          "moteur": "Python",
+          "poids": "4,0 Kio",
+          "date": "2026-09-05"
+        },
+        {
+          "groupe": "Cooks et générateurs",
+          "nom": "Mettre à niveau les ateliers",
+          "court": "Propage une évolution du thème à tous les ateliers déjà posés, en archivant l'ancien code et sans toucher aux fichiers de travail.",
+          "moteur": "Python",
+          "poids": "3,4 Kio",
+          "date": "2026-09-03"
+        },
+        {
+          "groupe": "Cooks et générateurs",
+          "nom": "Installer le mode gabarit",
+          "court": "Prépare la chaîne qui transforme une référence en machine.",
+          "moteur": "Shell",
+          "poids": "838 o",
+          "date": "2026-09-03"
+        },
+        {
+          "groupe": "Traitement d'image",
+          "nom": "Plafonner un lot",
+          "court": "Huit mégaoctets par photo, et une seule variable touchée : ni redimensionnement, ni conversion de couleur, ni changement de chroma.",
+          "moteur": "Python, ImageMagick",
+          "poids": "3,8 Kio",
+          "date": "2026-09-03"
+        },
+        {
+          "groupe": "Traitement d'image",
+          "nom": "Vignettage doux",
+          "court": "Moyenne de deux gradients radiaux en une seule passe, pour ne quantifier qu'une fois.",
+          "moteur": "Shell, ImageMagick",
+          "poids": "2,9 Kio",
+          "date": "2026-09-03"
+        },
+        {
+          "groupe": "Traitement d'image",
+          "nom": "Rendu image par image",
+          "court": "Capture une animation CSS image par image et l'assemble.",
+          "moteur": "Shell, ffmpeg",
+          "poids": "1,7 Kio",
+          "date": "2026-09-03"
+        },
+        {
+          "groupe": "Traitement d'image",
+          "nom": "Régénérer le catalogue de polices",
+          "court": "Après toute installation de police.",
+          "moteur": "Shell",
+          "poids": "5,2 Kio",
+          "date": "2026-09-03"
+        },
+        {
+          "groupe": "Vérificateurs",
+          "nom": "Contrôle de l'éditeur",
+          "court": "Édition, reprise, compteur, export, petit écran, refus de stockage, dans un navigateur isolé.",
+          "moteur": "Node, Playwright",
+          "poids": "7,7 Kio",
+          "date": "2026-09-03"
+        },
+        {
+          "groupe": "Vérificateurs",
+          "nom": "Contrôle de l'instanciation",
+          "court": "Vérifie qu'une régénération préserve le post, les paramètres et les sorties déjà produites.",
+          "moteur": "Python",
+          "poids": "2,9 Kio",
+          "date": "2026-09-03"
+        },
+        {
+          "groupe": "Vérificateurs",
+          "nom": "Contrôle de l'interface",
+          "court": "Thèmes, contraste, police réellement rendue.",
+          "moteur": "Node",
+          "poids": "4,4 Kio",
+          "date": "2026-09-03"
+        },
+        {
+          "groupe": "Vérificateurs",
+          "nom": "Index et conservation",
+          "court": "Régénère l'index du corpus et vérifie que les sources fusionnées restent intactes.",
+          "moteur": "Python",
+          "poids": "3,4 Kio",
+          "date": "2026-09-05"
+        },
+        {
+          "groupe": "Corpus et références",
+          "nom": "Le corpus",
+          "court": "Cent trente sections : les lois, les recettes, et surtout les erreurs déjà payées, qui coûtent bien plus cher à redécouvrir qu'à relire.",
+          "moteur": "Markdown",
+          "poids": "303,4 Kio",
+          "date": "2026-09-05"
+        },
+        {
+          "groupe": "Corpus et références",
+          "nom": "Index de lecture",
+          "court": "Ce qui se lit d'office, et ce qui ne se lit que quand son sujet tombe.",
+          "moteur": "Markdown",
+          "poids": "11,9 Kio",
+          "date": "2026-09-05"
+        },
+        {
+          "groupe": "Corpus et références",
+          "nom": "Mode gabarit",
+          "court": "Comment une référence devient une spécification exécutable.",
+          "moteur": "Markdown",
+          "poids": "7,8 Kio",
+          "date": "2026-09-03"
+        },
+        {
+          "groupe": "Corpus et références",
+          "nom": "Contrat de l'éditeur",
+          "court": "Définition et paramètres.",
+          "moteur": "Markdown",
+          "poids": "3,6 Kio",
+          "date": "2026-09-05"
+        },
+        {
+          "groupe": "Corpus et références",
+          "nom": "Sources de la fusion",
+          "court": "Les trois corpus d'origine et leurs empreintes, vérifiables un par un.",
+          "moteur": "Archive",
+          "poids": "422,5 Kio",
+          "date": "2026-09-03"
+        },
+        {
+          "groupe": "Corpus et références",
+          "nom": "Registre des instances",
+          "court": "Une ligne par atelier créé.",
+          "moteur": "Markdown",
+          "poids": "5,0 Kio",
+          "date": "2026-09-03"
+        }
+      ]
+    },
+    {
+      "id": "lorem-ipsum",
+      "categorie": "Design",
+      "nom": "Lorem ipsum dolor sit amet",
+      "depose": "2026-09-05",
+      "demo": true,
+      "resume": "Projet de démonstration, sans contenu réel. Il sert à montrer comment un second projet se range dans la collection et hérite du même style, sans qu'aucune donnée soit inventée à propos d'un travail qui n'existe pas.",
+      "vitrine": [
+        {
+          "titre": "Consectetur adipiscing",
+          "note": "Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+        },
+        {
+          "titre": "Ut enim ad minim",
+          "note": "Quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo."
+        },
+        {
+          "titre": "Duis aute irure",
+          "note": "Dolor in reprehenderit in voluptate velit esse cillum dolore."
+        },
+        {
+          "titre": "Excepteur sint occaecat",
+          "note": "Cupidatat non proident, sunt in culpa qui officia deserunt mollit."
+        }
+      ],
+      "composants": [
+        {
+          "groupe": "Lorem",
+          "nom": "Ipsum dolor",
+          "court": "Sit amet consectetur adipiscing elit, sed do eiusmod tempor.",
+          "moteur": "Lorem",
+          "poids": "0 o",
+          "date": "2026-09-05"
+        },
+        {
+          "groupe": "Lorem",
+          "nom": "Tempor incididunt",
+          "court": "Ut labore et dolore magna aliqua, ut enim ad minim veniam.",
+          "moteur": "Lorem",
+          "poids": "0 o",
+          "date": "2026-09-05"
+        }
+      ]
+    },
+    {
+      "id": "retour-japon-2027",
+      "name": "ZenRay Japan ComeBack",
+      "category": "Plan",
+      "summary": "Le retour au Japon en 2027 : les 34 pages du carnet photographiées, leur transcription, la synthèse, le plan chiffré des 12 semaines (10 000 à 20 000 €) et le calendrier PVT corrigé pour Marseille.",
+      "date": "2026-09-11",
+      "folder": "pages/ZenRayAssets/tmp-zenray-japan-comeback",
+      "cover": "pages/ZenRayAssets/tmp-zenray-japan-comeback/carnet/IMG_7160.jpeg.img.json",
+      "sources": [
+        {
+          "localPath": "/Users/zenray/Downloads/tmp-selection-imgplan3months",
+          "target": "carnet",
+          "count": 34,
+          "bytes": 101377415,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-11T11:20:32.627Z"
+        },
+        {
+          "localPath": "/Users/zenray/Create/Build/Memory/PVT/2026-09-10-plan-retour-japon",
+          "target": "plans",
+          "count": 3,
+          "bytes": 61175,
+          "present": true,
+          "keep": true,
+          "checkedAt": "2026-09-11T11:20:32.627Z"
+        },
+        {
+          "localPath": "/Users/zenray/Create/Build/Memory/PVT",
+          "target": "calendrier",
+          "count": 1,
+          "bytes": 24092,
+          "paths": [
+            "/Users/zenray/Create/Build/Memory/PVT/PVT-2027-Calendrier.html"
+          ],
+          "present": true,
+          "keep": true,
+          "checkedAt": "2026-09-11T11:20:32.627Z"
+        }
+      ],
+      "showcase": [
+        {
+          "image": "/zr-assets/retour-japon-2027/01-calendrier.webp",
+          "titre": "Calendrier PVT 2027",
+          "note": "Bandeau de correction du 10 septembre : le depot se fait a Marseille, pas a Strasbourg."
+        }
+      ],
+      "components": [
+        {
+          "nom": "Carnet, transcription brute (34 pages)",
+          "groupe": "Documents",
+          "court": "Les 34 pages du carnet photographiees, recopiees mot pour mot.",
+          "moteur": "",
+          "poids": "19,7 Kio",
+          "date": "2026-09-10",
+          "lien": "https://github.com/matthieuhuguet/Memory/blob/main/PVT/2026-09-10-plan-retour-japon/01-carnet-transcription-brute.md"
+        },
+        {
+          "nom": "Carnet, synthese par theme",
+          "groupe": "Documents",
+          "court": "Le carnet regroupe en neuf themes, grammaire corrigee seulement.",
+          "moteur": "",
+          "poids": "15,0 Kio",
+          "date": "2026-09-10",
+          "lien": "https://github.com/matthieuhuguet/Memory/blob/main/PVT/2026-09-10-plan-retour-japon/02-carnet-synthese.md"
+        },
+        {
+          "nom": "Plan des 12 semaines",
+          "groupe": "Documents",
+          "court": "Budget chiffre, trois moteurs de revenu, calendrier, journee type, sources.",
+          "moteur": "",
+          "poids": "25,1 Kio",
+          "date": "2026-09-10",
+          "lien": "https://github.com/matthieuhuguet/Memory/blob/main/PVT/2026-09-10-plan-retour-japon/03-plan-12-semaines.md"
+        },
+        {
+          "nom": "Calendrier PVT 2027",
+          "groupe": "Documents",
+          "court": "Calendrier de mission, avec la correction du 10 septembre sur la juridiction de Marseille.",
+          "moteur": "",
+          "poids": "23,5 Kio",
+          "date": "2026-09-10",
+          "lien": "https://github.com/matthieuhuguet/Memory/blob/main/PVT/PVT-2027-Calendrier.html"
+        },
+        {
+          "nom": "Identity, section Retour au Japon 2027",
+          "groupe": "Documents",
+          "court": "La decision validee, ajoutee a la fin de ce fichier vivant (poids mesure = le fichier entier).",
+          "moteur": "",
+          "poids": "532,4 Kio",
+          "date": "2026-09-10",
+          "lien": "https://github.com/matthieuhuguet/Memory/blob/main/Identity/Matthieu1.md"
+        },
+        {
+          "nom": "CLAUDE.md, banniere P0",
+          "groupe": "Regles globales",
+          "court": "Banniere de priorite zero, objectif chiffre et les trois moteurs.",
+          "moteur": "",
+          "poids": "209,3 Kio",
+          "date": "2026-09-10",
+          "lien": "https://github.com/matthieuhuguet/.claude/blob/main/CLAUDE.md"
+        }
+      ]
+    },
+    {
+      "id": "zenray-studio",
+      "name": "ZenRay Studio",
+      "category": "Design",
+      "summary": "Le store zenray.studio : la maquette validée avec les vraies images du portfolio (clair et sombre) et la version publiée en ligne, même design, trois projets Lorem Ipsum en attendant les vrais produits.",
+      "date": "2026-09-11",
+      "folder": "pages/ZenRayAssets/tmp-zenray-studio",
+      "cover": "pages/ZenRayAssets/tmp-zenray-studio/cover/zenray-studio-hero.jpg.img.json",
+      "sources": [
+        {
+          "localPath": "/Users/zenray/Downloads/tmp-zenray-studio-site",
+          "target": "maquette",
+          "count": 18,
+          "bytes": 2877640,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-11T15:12:57.392Z"
+        },
+        {
+          "localPath": "/Users/zenray/Create/Build/Productions/GithubProductions/ZenRayStudio/site",
+          "target": "store-final",
+          "count": 8,
+          "bytes": 816313,
+          "present": true,
+          "keep": true,
+          "checkedAt": "2026-09-11T15:12:57.392Z"
+        },
+        {
+          "localPath": "/Users/zenray/Create/Share/tmp-zenray-assets-docs/zenray-studio",
+          "target": "cover",
+          "count": 1,
+          "bytes": 117181,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-11T15:12:57.392Z"
+        }
+      ],
+      "showcase": [
+        {
+          "image": "/zr-assets/zenray-studio/01-clair.webp",
+          "titre": "Theme clair",
+          "note": "Louisiana Bayou en vedette, ordre valide le 10 septembre a 13h52."
+        },
+        {
+          "image": "/zr-assets/zenray-studio/02-sombre.webp",
+          "titre": "Theme sombre",
+          "note": "Meme page, bascule de theme au bouton, memorisee par visiteur."
+        }
+      ],
+      "components": [
+        {
+          "nom": "Page d'accueil",
+          "groupe": "Code",
+          "court": "Un seul fichier, gabarit + jetons + donnees, derive de la direction Galerie.",
+          "moteur": "",
+          "poids": "29,2 Kio",
+          "date": "2026-09-10",
+          "lien": "pages/A/zenray-assets-originaux/zenray-studio-site"
+        },
+        {
+          "nom": "Toki Pavilion",
+          "groupe": "Images reelles du portfolio",
+          "court": "Rendu Unreal Engine 5.",
+          "moteur": "",
+          "poids": "291,3 Kio",
+          "date": "2026-09-10"
+        },
+        {
+          "nom": "Bayou Church",
+          "groupe": "Images reelles du portfolio",
+          "court": "Rendu clay, Houdini vers Unreal.",
+          "moteur": "",
+          "poids": "25,9 Kio",
+          "date": "2026-09-10"
+        },
+        {
+          "nom": "Rock Generator",
+          "groupe": "Images reelles du portfolio",
+          "court": "Rocher procedural Houdini.",
+          "moteur": "",
+          "poids": "106,0 Kio",
+          "date": "2026-09-10"
+        },
+        {
+          "nom": "Cliff Material",
+          "groupe": "Images reelles du portfolio",
+          "court": "Materiau de falaise, Substance Designer.",
+          "moteur": "",
+          "poids": "54,1 Kio",
+          "date": "2026-09-10"
+        },
+        {
+          "nom": "Water Wheel",
+          "groupe": "Images reelles du portfolio",
+          "court": "Roue a eau en bois, Unreal Engine 5.",
+          "moteur": "",
+          "poids": "53,2 Kio",
+          "date": "2026-09-10"
+        },
+        {
+          "nom": "Stairs Component",
+          "groupe": "Images reelles du portfolio",
+          "court": "HDA d'escalier parametrique.",
+          "moteur": "",
+          "poids": "24,2 Kio",
+          "date": "2026-09-10"
+        },
+        {
+          "nom": "Pampa Grass",
+          "groupe": "Images reelles du portfolio",
+          "court": "Herbe procedurale Houdini.",
+          "moteur": "",
+          "poids": "74,1 Kio",
+          "date": "2026-09-10"
+        },
+        {
+          "nom": "Versailles Planter",
+          "groupe": "Images reelles du portfolio",
+          "court": "Bac a plante parametrique.",
+          "moteur": "",
+          "poids": "108,1 Kio",
+          "date": "2026-09-10"
+        },
+        {
+          "nom": "Toki, toits d'automne",
+          "groupe": "Images reelles du portfolio",
+          "court": "Vue des toits, collection Japan rebuilt in 3D.",
+          "moteur": "",
+          "poids": "223,0 Kio",
+          "date": "2026-09-10"
+        },
+        {
+          "nom": "Scattering Houdini vers Unreal",
+          "groupe": "Images reelles du portfolio",
+          "court": "Viewport Houdini et Unreal cote a cote.",
+          "moteur": "",
+          "poids": "94,9 Kio",
+          "date": "2026-09-10"
+        },
+        {
+          "nom": "Organic texturing, Point VOP",
+          "groupe": "Images reelles du portfolio",
+          "court": "Texturing organique par Point VOP.",
+          "moteur": "",
+          "poids": "69,2 Kio",
+          "date": "2026-09-10"
+        },
+        {
+          "nom": "Procedural shutters",
+          "groupe": "Images reelles du portfolio",
+          "court": "Volets procedureaux en bois.",
+          "moteur": "",
+          "poids": "119,9 Kio",
+          "date": "2026-09-10"
+        },
+        {
+          "nom": "Inter Variable",
+          "groupe": "Polices servies",
+          "court": "Chrome et corps de texte, servie, jamais attendue du systeme.",
+          "moteur": "",
+          "poids": "344,0 Kio",
+          "date": "2026-09-05"
+        },
+        {
+          "nom": "AnthropicSerif, romain",
+          "groupe": "Polices servies",
+          "court": "Titres et tout nombre visible.",
+          "moteur": "",
+          "poids": "235,2 Kio",
+          "date": "2026-09-05"
+        },
+        {
+          "nom": "AnthropicSerif, italique",
+          "groupe": "Polices servies",
+          "court": "Second ton du titre principal.",
+          "moteur": "",
+          "poids": "37,8 Kio",
+          "date": "2026-09-05"
+        }
+      ]
+    },
+    {
+      "id": "louisiana-bayou-houdini-church",
+      "name": "Louisiana Bayou, Houdini Procedural Church",
+      "category": "3D",
+      "summary": "Chapelle du bayou modélisée de façon procédurale dans Houdini pour Unreal : trois composants HDA (Armature, WoodFacade, PorchStairs), trois shorts de 15 s avec leur musique, les images de production et le pipeline Shorts Reel qui les a fabriqués. Premier produit du store zenray.studio.",
+      "date": "2026-09-11",
+      "folder": "pages/ZenRayAssets/tmp-louisiana-bayou-houdini-church",
+      "cover": "pages/ZenRayAssets/tmp-louisiana-bayou-houdini-church/cover/louisiana-bayou-unreal-render.webp.img.json",
+      "sources": [
+        {
+          "localPath": "/Users/zenray/Downloads/post-3components-zenray-houdini",
+          "target": "shorts",
+          "count": 16,
+          "bytes": 54220597,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-11T15:14:26.163Z"
+        },
+        {
+          "localPath": "/Users/zenray/Downloads/tmp-downloads",
+          "target": "musiques",
+          "count": 6,
+          "bytes": 14217198,
+          "paths": [
+            "/Users/zenray/Downloads/tmp-downloads/orpheline-premiere-15s.mp3",
+            "/Users/zenray/Downloads/tmp-downloads/Orpheline - Johanna Baget, Marianne ft. Alice Duport-Percier.mp3",
+            "/Users/zenray/Downloads/tmp-downloads/eikonoklasm-derniere-15s.mp3",
+            "/Users/zenray/Downloads/tmp-downloads/Eikonoklasm.mp3",
+            "/Users/zenray/Downloads/tmp-downloads/monocos-station-tics-tacs-derniere-15s.mp3",
+            "/Users/zenray/Downloads/tmp-downloads/Clair Obscur： Expedition 33 (Original Soundtrack) 74 - Monoco's Station - Tics Tacs.mp3"
+          ],
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-11T15:14:26.163Z"
+        },
+        {
+          "localPath": "/Users/zenray/Downloads/tmp-3D-houdini",
+          "target": "images",
+          "count": 16,
+          "bytes": 5776865,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-11T15:14:26.163Z"
+        },
+        {
+          "localPath": "/Users/zenray/Create/Share/tmp-zenray-assets-docs/louisiana-bayou",
+          "target": "docs",
+          "count": 1,
+          "bytes": 32229,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-11T15:14:26.163Z"
+        },
+        {
+          "localPath": "/Users/zenray/Create/Share/tmp-zenray-assets-docs/louisiana-bayou-cover",
+          "target": "cover",
+          "count": 1,
+          "bytes": 26518,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-11T15:14:26.163Z"
+        }
+      ]
+    },
+    {
+      "id": "post-instagram-story-2026-09-09",
+      "name": "Post Instagram Story du 9 septembre 2026",
+      "category": "Social",
+      "summary": "Le post Story du 9 septembre 2026 en deux versions : les photos sources, les exports et l'atelier HTML HDA qui les a composés (v1 avec ses 13 exports, v2 resserrée à 12 photos).",
+      "date": "2026-09-11",
+      "folder": "pages/ZenRayAssets/tmp-post-instagram-story-2026-09-09",
+      "cover": "pages/ZenRayAssets/tmp-post-instagram-story-2026-09-09/v1/out/01.jpg.img.json",
+      "sources": [
+        {
+          "localPath": "/Users/zenray/Downloads/tmp-selection1",
+          "target": "v1",
+          "count": 121,
+          "bytes": 162694607,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-11T11:22:57.777Z"
+        },
+        {
+          "localPath": "/Users/zenray/Downloads/tmp-selection-v2",
+          "target": "v2",
+          "count": 95,
+          "bytes": 71584585,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-11T11:22:57.777Z"
+        }
+      ]
+    },
+    {
+      "id": "2026-09-03-divers",
+      "name": "Divers du 3 septembre 2026",
+      "category": "Divers",
+      "summary": "Chantiers rangés depuis Downloads le 14 septembre 2026, un sous-dossier par chantier : temp_upload, TempItems, temp post, clip-cowork, tmp-claude-ai-discussions, tmp-Aout 2026.",
+      "date": "2026-09-14",
+      "folder": "pages/ZenRayAssets/tmp-2026-09-03-divers",
+      "cover": "pages/ZenRayAssets/tmp-2026-09-03-divers/temp-upload/23B5275A-93AA-46F0-A796-6B6F3F9CB022.jpeg.img.json",
+      "sources": [
+        {
+          "localPath": "/Users/zenray/.claude/tmp/temp_upload",
+          "target": "temp-upload",
+          "count": 81,
+          "bytes": 427569288,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-14T11:12:19.200Z"
+        },
+        {
+          "localPath": "/Users/zenray/.claude/tmp/TempItems",
+          "target": "tempitems",
+          "count": 10,
+          "bytes": 34528439,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-14T11:12:19.200Z"
+        },
+        {
+          "localPath": "/Users/zenray/.claude/tmp/temp post",
+          "target": "temp-post",
+          "count": 8,
+          "bytes": 15263844,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-14T11:12:19.200Z"
+        },
+        {
+          "localPath": "/Users/zenray/.claude/tmp/clip-cowork",
+          "target": "clip-cowork",
+          "count": 3,
+          "bytes": 12781296,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-14T11:12:19.200Z"
+        },
+        {
+          "localPath": "/Users/zenray/.claude/tmp/tmp-claude-ai-discussions",
+          "target": "tmp-claude-ai-discussions",
+          "count": 1,
+          "bytes": 173555,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-14T11:12:19.200Z"
+        },
+        {
+          "localPath": "/Users/zenray/.claude/tmp/tmp-Aout 2026",
+          "target": "tmp-aout-2026",
+          "count": 15,
+          "bytes": 100323,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-14T11:12:19.200Z"
+        }
+      ]
+    },
+    {
+      "id": "2026-09-04-design-zenray",
+      "name": "Design ZenRay du 4 septembre 2026",
+      "category": "Design",
+      "summary": "Chantiers rangés depuis Downloads le 14 septembre 2026, un sous-dossier par chantier : tmp-zenray-designs, tmp-concepts-zenray, tmp-graphic1, tmp-infographiespeechtotext, zenray-post-blackmyth, tmp-thewitcher3-artdirection, greg-guillotin-media-test1, subtitle_compare.",
+      "date": "2026-09-14",
+      "folder": "pages/ZenRayAssets/tmp-2026-09-04-design-zenray",
+      "cover": "pages/ZenRayAssets/tmp-2026-09-04-design-zenray/tmp-concepts-zenray/preview.png.img.json",
+      "sources": [
+        {
+          "localPath": "/Users/zenray/.claude/tmp/tmp-zenray-designs",
+          "target": "tmp-zenray-designs",
+          "count": 13,
+          "bytes": 2556965,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-14T11:14:01.537Z"
+        },
+        {
+          "localPath": "/Users/zenray/.claude/tmp/tmp-concepts-zenray",
+          "target": "tmp-concepts-zenray",
+          "count": 3,
+          "bytes": 1030791,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-14T11:14:01.537Z"
+        },
+        {
+          "localPath": "/Users/zenray/.claude/tmp/tmp-graphic1",
+          "target": "tmp-graphic1",
+          "count": 63,
+          "bytes": 4549324,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-14T11:14:01.537Z"
+        },
+        {
+          "localPath": "/Users/zenray/.claude/tmp/tmp-infographiespeechtotext",
+          "target": "tmp-infographiespeechtotext",
+          "count": 5,
+          "bytes": 568492,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-14T11:14:01.537Z"
+        },
+        {
+          "localPath": "/Users/zenray/.claude/tmp/zenray-post-blackmyth",
+          "target": "zenray-post-blackmyth",
+          "count": 12,
+          "bytes": 3229330,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-14T11:14:01.537Z"
+        },
+        {
+          "localPath": "/Users/zenray/.claude/tmp/tmp-thewitcher3-artdirection",
+          "target": "tmp-thewitcher3-artdirection",
+          "count": 57,
+          "bytes": 168116580,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-14T11:14:01.537Z"
+        },
+        {
+          "localPath": "/Users/zenray/.claude/tmp/greg-guillotin-media-test1",
+          "target": "greg-guillotin-media-test1",
+          "count": 25,
+          "bytes": 437458,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-14T11:14:01.537Z"
+        },
+        {
+          "localPath": "/Users/zenray/.claude/tmp/subtitle_compare",
+          "target": "subtitle-compare",
+          "count": 10,
+          "bytes": 5995300,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-14T11:14:01.537Z"
+        }
+      ]
+    },
+    {
+      "id": "2026-08-22-japon-fuji-nantai",
+      "name": "Japon, Fuji et Nantai du 22 août 2026",
+      "category": "Photo",
+      "summary": "Chantiers rangés depuis Downloads le 14 septembre 2026, un sous-dossier par chantier : tmp-fuji, temp-nantai-mount, TempJaponais1, tmp-jpn.",
+      "date": "2026-09-14",
+      "folder": "pages/ZenRayAssets/tmp-2026-08-22-japon-fuji-nantai",
+      "cover": "pages/ZenRayAssets/tmp-2026-08-22-japon-fuji-nantai/tmp-fuji/757908840_18441927775122989_820966231932901184_n.jpg.img.json",
+      "sources": [
+        {
+          "localPath": "/Users/zenray/.claude/tmp/tmp-fuji",
+          "target": "tmp-fuji",
+          "count": 43,
+          "bytes": 303015709,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-14T11:19:43.477Z"
+        },
+        {
+          "localPath": "/Users/zenray/.claude/tmp/temp-nantai-mount",
+          "target": "temp-nantai-mount",
+          "count": 40,
+          "bytes": 508375201,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-14T11:19:43.477Z"
+        },
+        {
+          "localPath": "/Users/zenray/.claude/tmp/TempJaponais1",
+          "target": "tempjaponais1",
+          "count": 33,
+          "bytes": 622824747,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-14T11:19:43.477Z"
+        },
+        {
+          "localPath": "/Users/zenray/.claude/tmp/tmp-jpn",
+          "target": "tmp-jpn",
+          "count": 36,
+          "bytes": 91631836,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-14T11:19:43.477Z"
+        }
+      ]
+    },
+    {
+      "id": "2026-09-04-posts-instagram-izu-tokyo",
+      "name": "Posts Instagram Izu et Tokyo du 4 septembre 2026",
+      "category": "Social",
+      "summary": "Chantiers rangés depuis Downloads le 14 septembre 2026, un sous-dossier par chantier : acquarium-post1, jogasaki-post2, shimoda-post3, ito-post4, streets-jogasaki5, meiji-jingu1.",
+      "date": "2026-09-14",
+      "folder": "pages/ZenRayAssets/tmp-2026-09-04-posts-instagram-izu-tokyo",
+      "cover": "pages/ZenRayAssets/tmp-2026-09-04-posts-instagram-izu-tokyo/acquarium-post1/DJI_20000818114702_0855_D.JPG.img.json",
+      "sources": [
+        {
+          "localPath": "/Users/zenray/.claude/tmp/acquarium-post1",
+          "target": "acquarium-post1",
+          "count": 452,
+          "bytes": 205337947,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-14T11:31:56.583Z"
+        },
+        {
+          "localPath": "/Users/zenray/.claude/tmp/jogasaki-post2",
+          "target": "jogasaki-post2",
+          "count": 250,
+          "bytes": 233290825,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-14T11:31:56.583Z"
+        },
+        {
+          "localPath": "/Users/zenray/.claude/tmp/shimoda-post3",
+          "target": "shimoda-post3",
+          "count": 373,
+          "bytes": 257214314,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-14T11:31:56.583Z"
+        },
+        {
+          "localPath": "/Users/zenray/.claude/tmp/ito-post4",
+          "target": "ito-post4",
+          "count": 452,
+          "bytes": 140259872,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-14T11:31:56.583Z"
+        },
+        {
+          "localPath": "/Users/zenray/.claude/tmp/streets-jogasaki5",
+          "target": "streets-jogasaki5",
+          "count": 159,
+          "bytes": 226313139,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-14T11:31:56.583Z"
+        },
+        {
+          "localPath": "/Users/zenray/.claude/tmp/meiji-jingu1",
+          "target": "meiji-jingu1",
+          "count": 87,
+          "bytes": 267526373,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-14T11:31:56.583Z"
+        }
+      ]
+    },
+    {
+      "id": "2026-08-29-gta-vi",
+      "name": "GTA VI du 29 août 2026",
+      "category": "Jeu vidéo",
+      "summary": "Chantiers rangés depuis Downloads le 14 septembre 2026, un sous-dossier par chantier : tmp-gta6, temp-gta-vi.",
+      "date": "2026-09-14",
+      "folder": "pages/ZenRayAssets/tmp-2026-08-29-gta-vi",
+      "cover": "pages/ZenRayAssets/tmp-2026-08-29-gta-vi/tmp-gta6/tmp-gta6-frames/gta6-0001.jpg.img.json",
+      "sources": [
+        {
+          "localPath": "/Users/zenray/.claude/tmp/tmp-gta6",
+          "target": "tmp-gta6",
+          "count": 1610,
+          "bytes": 1788448369,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-14T11:42:49.935Z"
+        },
+        {
+          "localPath": "/Users/zenray/.claude/tmp/temp-gta-vi",
+          "target": "temp-gta-vi",
+          "count": 3,
+          "bytes": 6114557,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-14T11:42:49.935Z"
+        }
+      ]
+    },
+    {
+      "id": "2026-08-29-photos-izu",
+      "name": "Photos Izu du 29 août 2026",
+      "category": "Photo",
+      "summary": "Chantiers rangés depuis Downloads le 14 septembre 2026, un sous-dossier par chantier : tmp-izu.",
+      "date": "2026-09-14",
+      "folder": "pages/ZenRayAssets/tmp-2026-08-29-photos-izu",
+      "cover": "pages/ZenRayAssets/tmp-2026-08-29-photos-izu/tmp-izu/31BF15F0-94A2-49B0-B43F-B77E16654DB0.jpeg.img.json",
+      "sources": [
+        {
+          "localPath": "/Users/zenray/.claude/tmp/tmp-izu",
+          "target": "tmp-izu",
+          "count": 749,
+          "bytes": 6152294746,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-14T12:03:21.774Z"
+        }
+      ]
+    },
+    {
+      "id": "copernicus-shorts-style-v4",
+      "name": "Copernicus Shorts Style V4",
+      "category": "Social",
+      "summary": "Complete Copernicus Shorts Style V4 bundle: 72 matrix variants, 72 high-resolution frames, blue, red, and yellow background assets, contact sheets, metadata, reproducible scripts, canonical subtitle animation, and the three selected final evidence frames with centered black drop shadow.",
+      "date": "2026-09-19",
+      "folder": "pages/ZenRayAssets/tmp-copernicus-shorts-style-v4",
+      "cover": "pages/ZenRayAssets/tmp-copernicus-shorts-style-v4/v4/final-2-outputs/v4_gt_sectra_white_blue_archive_garamond_white_black_shadow.png.img.json",
+      "sources": [
+        {
+          "localPath": "/Users/zenray/Downloads/materials-copernicus-exercize/tmp-layer/texture-black-white/shorts/style-v4-background-variants",
+          "target": "v4",
+          "count": 164,
+          "bytes": 287872003,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-19T16:45:54.654Z"
+        },
+        {
+          "localPath": "/Users/zenray/Downloads/materials-copernicus-exercize/tmp-layer/texture-black-white/shorts",
+          "target": "scripts",
+          "count": 3,
+          "bytes": 54931,
+          "paths": [
+            "/Users/zenray/Downloads/materials-copernicus-exercize/tmp-layer/texture-black-white/shorts/generate_shorts_alphas.py",
+            "/Users/zenray/Downloads/materials-copernicus-exercize/tmp-layer/texture-black-white/shorts/generate_all_shorts.py",
+            "/Users/zenray/Downloads/materials-copernicus-exercize/tmp-layer/texture-black-white/shorts/generate_v4_selected.py"
+          ],
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-19T16:45:54.656Z"
+        },
+        {
+          "localPath": "/Users/zenray/Downloads/materials-copernicus-exercize/tmp-layer",
+          "target": "source-backgrounds",
+          "count": 2,
+          "bytes": 2811730,
+          "paths": [
+            "/Users/zenray/Downloads/materials-copernicus-exercize/tmp-layer/img-blue-layer-01.png",
+            "/Users/zenray/Downloads/materials-copernicus-exercize/tmp-layer/img-red-layer-02.png"
+          ],
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-19T16:45:54.656Z"
+        }
+      ]
+    },
+    {
+      "id": "sfx-audio-2026-09-19",
+      "name": "SFX audio collection",
+      "category": "Audio",
+      "summary": "Audio files collected from the selected temporary work folders for the SFX library.",
+      "date": "2026-09-19",
+      "folder": "pages/ZenRayAssets/tmp-sfx-audio-2026-09-19",
+      "cover": null,
+      "sources": [
+        {
+          "localPath": "/Users/zenray/.claude/tmp/tmp-audio-sfx-cloud/audio",
+          "target": "SFX",
+          "count": 379,
+          "bytes": 1759987397,
+          "present": false,
+          "keep": false,
+          "checkedAt": "2026-09-19T16:48:51.047Z"
+        }
+      ]
+    },
+    {
+      "id": "roof-tiles-copernicus-short",
+      "name": "Roof Tiles, Copernicus to Unreal Short",
+      "category": "3D",
+      "summary": "Procedural roof tiles built in Houdini Copernicus (716 nodes, 74 details, grouped by family) and looked-dev in Unreal 5.8 with Nanite displacement: layer-by-layer screen recording of the graph, 2K vertical turntable on a cyclorama with three-point lighting, final maps, comparison sheets, Houdini and Unreal scripts, FBX, and the short edit plan.",
+      "date": "2026-09-24",
+      "folder": "pages/ZenRayAssets/tmp-roof-tiles-copernicus-short",
+      "cover": "pages/ZenRayAssets/tmp-roof-tiles-copernicus-short/cover/roof_turn_0150.png.img.json",
+      "sources": [
+        {
+          "localPath": "/Users/zenray/.claude/tmp/tmp-short-roof-tiles-copernicus/01-houdini-layers",
+          "target": "shorts/houdini-layers",
+          "count": 5,
+          "bytes": 299557930,
+          "paths": [
+            "/Users/zenray/.claude/tmp/tmp-short-roof-tiles-copernicus/01-houdini-layers/houdini_layers_walkthrough.mov",
+            "/Users/zenray/.claude/tmp/tmp-short-roof-tiles-copernicus/01-houdini-layers/layers_viewer_1x.mov",
+            "/Users/zenray/.claude/tmp/tmp-short-roof-tiles-copernicus/01-houdini-layers/layers_viewer_2x.mov",
+            "/Users/zenray/.claude/tmp/tmp-short-roof-tiles-copernicus/01-houdini-layers/layers_full_window.mov",
+            "/Users/zenray/.claude/tmp/tmp-short-roof-tiles-copernicus/01-houdini-layers/walkthrough_log.json"
+          ],
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-24T03:17:25.136Z"
+        },
+        {
+          "localPath": "/Users/zenray/.claude/tmp/tmp-short-roof-tiles-copernicus/02-unreal-turntable",
+          "target": "shorts/unreal-turntable",
+          "count": 2,
+          "bytes": 102868885,
+          "paths": [
+            "/Users/zenray/.claude/tmp/tmp-short-roof-tiles-copernicus/02-unreal-turntable/roof_turntable_2k.mov",
+            "/Users/zenray/.claude/tmp/tmp-short-roof-tiles-copernicus/02-unreal-turntable/roof_turntable_2k_30s.mov"
+          ],
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-24T03:17:25.136Z"
+        },
+        {
+          "localPath": "/Users/zenray/.claude/tmp/tmp-short-roof-tiles-copernicus/02-unreal-turntable/frames",
+          "target": "cover",
+          "count": 1,
+          "bytes": 4159853,
+          "paths": [
+            "/Users/zenray/.claude/tmp/tmp-short-roof-tiles-copernicus/02-unreal-turntable/frames/roof_turn_0150.png"
+          ],
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-24T03:17:25.136Z"
+        },
+        {
+          "localPath": "/Users/zenray/.claude/tmp/tmp-short-roof-tiles-copernicus/03-stills",
+          "target": "stills",
+          "count": 11,
+          "bytes": 36480235,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-24T03:17:25.136Z"
+        },
+        {
+          "localPath": "/Users/zenray/.claude/tmp/tmp-short-roof-tiles-copernicus/04-edit",
+          "target": "edit",
+          "count": 1,
+          "bytes": 1698,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-24T03:17:25.136Z"
+        },
+        {
+          "localPath": "/Users/zenray/Downloads/materials-copernicus-exercize/10-renders",
+          "target": "renders",
+          "count": 15,
+          "bytes": 11824107,
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-24T03:17:25.136Z"
+        },
+        {
+          "localPath": "/Users/zenray/Downloads/materials-copernicus-exercize",
+          "target": "houdini",
+          "count": 3,
+          "bytes": 2444860,
+          "paths": [
+            "/Users/zenray/Downloads/materials-copernicus-exercize/Tiles_V2.hiplc",
+            "/Users/zenray/Downloads/materials-copernicus-exercize/FEEDBACK.md",
+            "/Users/zenray/Downloads/materials-copernicus-exercize/README.md"
+          ],
+          "present": true,
+          "keep": false,
+          "checkedAt": "2026-09-24T03:17:25.136Z"
+        },
+        {
+          "localPath": "/Users/zenray/Downloads/materials-copernicus-exercize/Scripts",
+          "target": "scripts/houdini",
+          "count": 9,
+          "bytes": 50171,
+          "paths": [
+            "/Users/zenray/Downloads/materials-copernicus-exercize/Scripts/BuildRoofTilesV2.py",
+            "/Users/zenray/Downloads/materials-copernicus-exercize/Scripts/RoofDetailsV2.py",
+            "/Users/zenray/Downloads/materials-copernicus-exercize/Scripts/TidyRoofTilesV2.py",
+            "/Users/zenray/Downloads/materials-copernicus-exercize/Scripts/LookDevRoofTilesV2.py",
+            "/Users/zenray/Downloads/materials-copernicus-exercize/Scripts/LayerWalkthroughRoofTilesV2.py",
+            "/Users/zenray/Downloads/materials-copernicus-exercize/Scripts/CompareHeightAligned.py",
+            "/Users/zenray/Downloads/materials-copernicus-exercize/Scripts/ColorZoneStats.py",
+            "/Users/zenray/Downloads/materials-copernicus-exercize/Scripts/MossStats.py",
+            "/Users/zenray/Downloads/materials-copernicus-exercize/Scripts/TileSilhouette.py"
+          ],
+          "present": true,
+          "keep": true,
+          "checkedAt": "2026-09-24T03:17:25.136Z"
+        },
+        {
+          "localPath": "/Users/zenray/Create/Build/Productions/ZenRayShards/Scripts",
+          "target": "scripts/unreal",
+          "count": 4,
+          "bytes": 25258,
+          "paths": [
+            "/Users/zenray/Create/Build/Productions/ZenRayShards/Scripts/LookDevRoofTilesV2Unreal.py",
+            "/Users/zenray/Create/Build/Productions/ZenRayShards/Scripts/LookDevStageUnreal.py",
+            "/Users/zenray/Create/Build/Productions/ZenRayShards/Scripts/BuildLookDevDenseMeshes.py",
+            "/Users/zenray/Create/Build/Productions/ZenRayShards/Scripts/BuildLookDevCyclorama.py"
+          ],
+          "present": true,
+          "keep": true,
+          "checkedAt": "2026-09-24T03:17:25.136Z"
+        },
+        {
+          "localPath": "/Users/zenray/Create/Build/Productions/ZenRayShards/SourceAssets/LookDev",
+          "target": "fbx",
+          "count": 3,
+          "bytes": 12975166,
+          "present": true,
+          "keep": true,
+          "checkedAt": "2026-09-24T03:17:25.136Z"
+        }
+      ]
+    }
+  ]
+}
