@@ -1,0 +1,5 @@
+# Addendum reprise (lu après le brief à chaque relance)
+
+Avant le point 1 du brief : vérifie si `/obj/Cop_M_RoofTiles_HERMES_01` existe déjà en live via le pont. Si oui, tu le réutilises, tu ne crées jamais de second copnet. Tu relis la fin de `feedback-hermes.md` (20 dernières lignes), la liste des copshots (`copshot list Cop_M_RoofTiles_HERMES_01`) et les PNG de `tmp-rooftiles-hermes`, puis tu reprends à la map en cours, au cycle suivant.
+
+Marqueurs à écrire dans `feedback-hermes.md` : `EQUIVALENCE 5 MAPS :` suivi des 5 chemins finaux quand tout est équivalent. `BLOCAGE DEFINITIF :` suivi de l écart exact quand deux runs de suite nomment le même écart sans le réduire.

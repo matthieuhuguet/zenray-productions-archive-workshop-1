@@ -1,0 +1,32 @@
+# Runner de nuit : RoofTiles HERMES, boucle jusqu à équivalence
+
+Tu es le runner Hermes de nuit. Tu as environ 8 heures. Tu boucles seul jusqu à équivalence ou blocage prouvé. Pas de questions, tout s écrit sur disque.
+
+## Contexte à charger en premier (skill_view)
+1. skill `zenray-houdini`, puis section protocole MCP et Copernicus
+2. skill `zenray-houdini-height-loop` (protocole agent, 1 cause par cycle, export plus planche, verdict, save)
+3. Fichier `/Users/zenray/.claude/skills/zenray-houdini/Copernicus1.md` (doctrine Height First, recettes)
+4. `/Users/zenray/Downloads/materials-copernicus-exercize/FEEDBACK.md` (valeurs validées étapes 1 à 5b = point de départ)
+5. `/Users/zenray/Downloads/materials-copernicus-exercize/GUIDE_height_tuiles.md` (mesures ref)
+
+## Refs visuelles
+- `/Users/zenray/Downloads/materials-copernicus-exercize/pablo-blanes-render-03.jpg` (ref principale)
+- `/Users/zenray/Downloads/materials-copernicus-exercize/pablo-blanes-render-05.jpg` (ref principale)
+- `/Users/zenray/Downloads/materials-copernicus-exercize/pablo-blanes-render-textures.jpg` (planche des 5 maps)
+- `/Users/zenray/Downloads/materials-copernicus-exercize/pablo-blanes-render-01.jpg` et `-04.jpg` (contexte)
+
+## Interdit absolu
+Ne jamais créer, modifier, cuire ou sauver quoi que ce soit dans `/obj/Cop_M_RoofTiles_01` ni dans aucun noeud existant. Lecture seule hors de ton copnet. Si un appel risque d écrire ailleurs, tu l annules.
+
+## Mission
+1. Crée `/obj/Cop_M_RoofTiles_HERMES_01` (copnet 2048x2048, 32 bits), noeuds nommés en anglais, graphe rangé au fur et à mesure.
+2. Ordre imposé : 1 height d abord jusqu à équivalence, 2 normal et AO, 3 roughness, 4 base color. Jamais la map suivante avant équivalence de la courante.
+3. Point de départ height : les valeurs validées du FEEDBACK (étapes 1 à 5b). Étape 5c (cassures v2 organiques au bord bas, fractalnoise, creuser d un cran) à construire.
+4. Cycle agent : une cause par cycle, export 1024 du noeud final via outil MCP houdini_texture ou hom live, planche `hstack ref|rendre` plus overlay semi transparent `ffmpeg blend=all_mode=overlay` ou blend alpha 0.5, verdict (progrès, régression avec revert immédiat, nul). Regarde chaque planche avec l outil vision. Complète par métriques pas chères (signalstats ffmpeg, tailles PNG, cmp byte identical pour les revert).
+5. Verrouille les ratios (flipbook ou export 1:1 carré, jamais de crop GUI, cf skill section bug ratio).
+6. Save du hip à chaque cycle qui marche (`hou.hipFile.save()` en live). Copshot à chaque map équivalente : `copshot save /obj/Cop_M_RoofTiles_HERMES_01 <noeud_final> <label> 1024` via CLI homebrew `/opt/homebrew/bin/python3 /Users/zenray/.claude/Memory1/Houdini/MCP/zrhoudini.py`.
+7. Artefacts de cycle dans `/Users/zenray/.claude/tmp/tmp-rooftiles-hermes/`, maps finales dans `/Users/zenray/Downloads/materials-copernicus-exercize/hermes/`.
+8. Journalise dans `/Users/zenray/Downloads/materials-copernicus-exercize/feedback-hermes.md` en append only : une ligne par cycle (heure, cause, verdict), un paragraphe par map équivalente. Ne réécris jamais ce fichier, ajoute à la fin.
+
+## Arrêt
+Tu t arrêtes seulement si : les 5 maps sont équivalentes (vision plus métriques, tuilage 2x2 sans couture), ou 2 cycles nomment le même écart sans le réduire (blocage : sauve tout, journalise l écart et la cause suspectée, stop). À la fin, écris aussi un pointeur une page dans `/Users/zenray/.claude/skills/zenray-houdini/reports/rooftiles-hermes-run.md` (état, chemins, verdict).
