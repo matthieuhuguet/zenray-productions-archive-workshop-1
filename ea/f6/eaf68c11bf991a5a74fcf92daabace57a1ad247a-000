@@ -1,0 +1,83 @@
+# 2026-09-24 : tidy the Tiles_V2 network by map category, with a FINAL_MAPS column (ours next to the reference).
+# FR : range le reseau par categorie de map ; colonne FINAL_MAPS, la notre a cote de la reference.
+import hou
+
+NET = '/obj/Tiles_V2'
+REF_DIR = '/Users/zenray/Downloads/materials-copernicus-exercize'
+# category title, colour, node names (in flow order)
+CATEGORIES = [
+    ('1  LAYOUT  la grille de tuiles', (0.45, 0.45, 0.50), ['layout', 'u', 'v', 'abs_u', 'half_width', 'layout_under']),
+    ('2  HEIGHT  forme de la tuile', (0.35, 0.52, 0.72), ['across', 'cylinder', 'peak_along', 'tile_height', 'in_tiles', 'HEIGHT_BASE']),
+    ('3  HEIGHT  fond (tuiles cachees, feuilles)', (0.32, 0.45, 0.62), ['under_ramp', 'leaves', 'leaf_bumps', 'background', 'tiles_on_bg']),
+    ('4  HEIGHT  eclats, mousse, grain', (0.28, 0.40, 0.58), ['tile_random', 'chip_tiles', 'chip_m0', 'chip_band', 'chip_cells', 'chip_cell_random', 'chip_cut',
+                                                           'chip_m1', 'chip_mask', 'chip_dent', 'chipped', 'moss_dots', 'moss_dot', 'moss_area', 'moss_where',
+                                                           'moss_mask', 'moss_bump', 'mossed', 'grain', 'height_core']),
+    ('5  BASE COLOR', (0.78, 0.50, 0.40), ['lime_noise', 'lime_mask', 'tile_variation', 'tile_color', 'bg_color', 'color_tiles', 'concrete_color',
+                                          'color_chips', 'moss_color', 'basecolor_core']),
+    ('6  ROUGHNESS', (0.55, 0.55, 0.55), ['rough_tiles', 'rough_bg', 'rough_mix', 'rough_chip_v', 'rough_chips', 'rough_moss_v', 'roughness_core']),
+    ('7  NORMAL et AO', (0.55, 0.45, 0.75), ['NORMAL', 'AO']),
+    ('8  EXPORT', (0.35, 0.35, 0.35), ['export_height', 'export_basecolor', 'export_roughness', 'export_normal', 'export_ao']),
+]
+FINALS = ['height', 'basecolor', 'roughness', 'normal', 'ao']
+SOURCE = {'height': 'HEIGHT', 'basecolor': 'BASECOLOR', 'roughness': 'ROUGHNESS', 'normal': 'NORMAL', 'ao': 'AO'}
+COL_W, ROW_H = 3.2, 1.1
+
+def tidy():
+    net = hou.node(NET)
+    for b in net.networkBoxes(): b.destroy()
+    for c in net.children():
+        if c.name().startswith(('zrexport_temp', 'probe')): c.destroy()
+    x = 0.0
+    for title, colour, names in CATEGORIES:
+        nodes = [net.node(n) for n in names if net.node(n)]
+        per_col = 10
+        for i, n in enumerate(nodes):
+            n.setPosition(hou.Vector2(x + (i // per_col) * COL_W, -(i % per_col) * ROW_H))
+            n.setColor(hou.Color(colour))
+        box = net.createNetworkBox(); box.setComment(title); box.setColor(hou.Color(colour))
+        for n in nodes: box.addItem(n)
+        box.fitAroundContents()
+        x += COL_W * (1 + (len(nodes) - 1) // per_col) + 1.2
+    # DETAILS: every node the detail engine made, one column per detail
+    import re
+    det = sorted({re.match(r'(d\d\d_[a-z_]+?)(_t\d|_and\d|_MASK|_h$|_H$|_col|_op|_C$|_rv|_rop|_R$|_t\d_rnd)', c.name()).group(1)
+                  for c in net.children() if re.match(r'd\d\d_', c.name())})
+    dbox = net.createNetworkBox(); dbox.setComment(f'9  DETAILS  {len(det)} details, une colonne par detail'); dbox.setColor(hou.Color(0.62, 0.52, 0.30))
+    for j, dn in enumerate(det):
+        nodes = sorted([c for c in net.children() if c.name().startswith(dn + '_')], key=lambda c: c.name())
+        for i, c in enumerate(nodes):
+            c.setPosition(hou.Vector2(x + (j + 1) * COL_W, -i * ROW_H)); dbox.addItem(c)
+    noises = [c for c in net.children() if c.name().startswith('n_')]
+    for i, c in enumerate(noises):
+        c.setPosition(hou.Vector2(x + (len(det) + 1) * COL_W, -i * ROW_H)); dbox.addItem(c)
+    # Engine inputs and outputs: one column left of the details, one row each (2026-09-24, they used to stack).
+    # FR : entrees et sorties du moteur, une colonne a gauche des details, une ligne chacune.
+    row = 0
+    for extra in ('gaps_mask', 'curv_core', 'curv_norm', 'height_core', 'basecolor_core', 'roughness_core', 'HEIGHT', 'BASECOLOR', 'ROUGHNESS'):
+        c = net.node(extra)
+        if c and c.parentNetworkBox() in (None, dbox):
+            c.setPosition(hou.Vector2(x, -row * ROW_H)); dbox.addItem(c); row += 1
+    dbox.fitAroundContents()
+    x += (len(det) + 2) * COL_W + 1.5
+    # FINAL_MAPS: one null per map (click it to view), the reference just beside it
+    fx = x + 1.0
+    final_box = net.createNetworkBox(); final_box.setComment('FINAL MAPS  clique un null pour voir la map, REF a droite')
+    final_box.setColor(hou.Color(0.25, 0.60, 0.40))
+    for i, m in enumerate(FINALS):
+        null = net.node(f'FINAL_{m}') or net.createNode('null', f'FINAL_{m}')
+        null.setInput(0, net.node(SOURCE[m]))
+        null.setPosition(hou.Vector2(fx, -i * 1.6)); null.setColor(hou.Color(0.25, 0.75, 0.45))
+        final_box.addItem(null)
+        refname = 'REF_height' if m == 'height' else f'REF_{m}'
+        ref = net.node(refname)
+        if ref is None and m != 'ao':
+            ref = net.createNode('file', refname); ref.parm('filename').set(f'{REF_DIR}/ref_{m}_square.jpg')
+        if ref is not None:
+            ref.setPosition(hou.Vector2(fx + 3.0, -i * 1.6)); ref.setColor(hou.Color(0.8, 0.3, 0.3))
+            final_box.addItem(ref)
+    final_box.fitAroundContents()
+    net.node('FINAL_basecolor').setDisplayFlag(True)
+    return final_box
+
+if True:
+    tidy()

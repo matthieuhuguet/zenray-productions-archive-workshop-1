@@ -1,0 +1,169 @@
+# 2026-09-24 : roof tiles V2, height built from the per-tile UV of ONE Tile Pattern.
+# Measured on ref_height_square.jpg: 10 columns, 8 tiles, every other column 0.2 tile lower,
+# tapered cylinder profile, linear ramp 0.58 -> 0.67 down each tile, small lip at the bottom.
+# FR : height des tuiles V2, construite depuis l'UV par tuile d'un seul Tile Pattern.
+import hou
+
+NET = '/obj/Tiles_V2'
+P = {                                   # the parameter interface, one place (values fitted, corr 0.955)
+    'cols': 10, 'rows': 8, 'col_offset': 0.05,
+    'taper_top': 0.777, 'taper_bot': 0.911, 'hscale': 0.95,
+    'profile_k': 1.967, 'profile_e': 0.661,
+    'peak_top': 0.584, 'peak_bot': 0.67, 'lip': 0.025, 'lip_start': 0.767, 'bg': 0.121,
+    'samples': 16,
+    'under_top': 0.10, 'under_bot': 0.20,              # hidden straight tiles, ramp down each row
+    'chip_ratio': 0.14, 'chip_cell': 0.10, 'chip_depth': 0.11, 'chip_cut': 0.55, 'chip_seed': 7.0,
+    'moss_cell': 0.02, 'moss_cut': 0.68, 'moss_height': 0.03, 'moss_density': 0.999,   # core moss off since 2026-09-24: moss lives in the detail engine, clustered
+    'grain_size': 0.004, 'grain_amp': 0.012,
+    # colours and roughness MEASURED on ref_basecolor_square / ref_roughness_square (2026-09-24)
+    'tile_dark': '#8e6957', 'tile_mid': '#a98473', 'tile_lime': '#c6ada2', 'lime_size': 0.03, 'lime_cut': 0.62,
+    'bg_dark': '#6f5a37', 'bg_light': '#ad7c5f', 'concrete': '#b4afa8', 'moss_col': '#6f7a3a',
+    'rough_tile': 0.75, 'rough_var': 0.12, 'rough_chip': 0.86, 'rough_moss': 0.92, 'rough_bg': 0.80,
+    'normal_scale': 0.04, 'ao_radius': 0.02,
+    'out_dir': '/Users/zenray/Downloads/materials-copernicus-exercize/textures', 'out_res': 2048,
+    'leaf_size': 0.04, 'leaf_stretch': 0.6, 'leaf_amp': 0.05, 'leaf_seed': 3.0,
+}
+
+def ramp(points, basis=hou.rampBasis.Linear):
+    return hou.Ramp([basis] * len(points), [p for p, _ in points], [v for _, v in points])
+
+def node(net, kind, name, inputs=(), **parms):
+    n = net.node(name) or net.createNode(kind, name)
+    for i, src in enumerate(inputs):
+        if src is not None:
+            n.setInput(i, src[0] if isinstance(src, tuple) else src, src[1] if isinstance(src, tuple) else 0)
+    for k, v in parms.items():
+        n.parm(k).set(v)
+    return n
+
+def build():
+    net = hou.node(NET)
+    keep = {'REF_height'}
+    for c in net.children():
+        if c.name() not in keep: c.destroy()
+    n = P['samples']
+    lay = node(net, 'tilepattern', 'layout', patterntype=15, tiledsizex=2, tiledsizey=2, cliptosize=0, useexpr=0,
+               basictype='trapezoid', trapezoid_tlength=P['taper_top'] / P['taper_bot'], trapezoid_blength=1.0,
+               scale=2.0, hscale=P['hscale'], vscale=1.0, doinset=0, draw=0)
+    lay.parm('nrows').set(1); lay.parm('rowheight1').set(2.0 / P['rows'])
+    lay.parm('ncolumns1').set(2)
+    for c in (1, 2): lay.parm(f'colwidth1_{c}').set(2.0 / P['cols'])
+    lay.parm('docoloffset1_2').set(1); lay.parm('coloffset1_2').set(P['col_offset'])
+    u = node(net, 'channelextract', 'u', [(lay, 2)], channel=0)
+    v = node(net, 'channelextract', 'v', [(lay, 2)], channel=1)
+    # |u| * 2, 0 at the tile axis, 1 at the bbox edge
+    absu = node(net, 'remap', 'abs_u', [u], inputmin=-0.5, inputmax=0.5, outputmin=0, outputmax=1, useramp=1)
+    absu.parm('ramp').set(ramp([(0, 1), (0.5, 0), (1, 1)]))
+    # relative half width: bottom (v=-0.5) taper_bot, top (v=+0.5) taper_top
+    hw = node(net, 'remap', 'half_width', [v], inputmin=-0.5, inputmax=0.5, outputmin=P['taper_bot'], outputmax=P['taper_top'], useramp=0)
+    x = node(net, 'blend', 'across', [absu, hw], mode=6)          # divide
+    prof = [(i / (n - 1), max(0.0, 1 - (i / (n - 1)) ** P['profile_k']) ** P['profile_e']) for i in range(n)]
+    s = node(net, 'remap', 'cylinder', [x], inputmin=0, inputmax=1, outputmin=0, outputmax=1, useramp=1, method=0)
+    s.parm('ramp').set(ramp(prof))
+    # peak above background along the tile: t = v + 0.5 (1 top, 0 bottom), vv = 1 - t
+    def peak(vv):
+        lipv = max(0.0, (vv - P['lip_start']) / (1 - P['lip_start'])) ** 2
+        return P['peak_top'] + (P['peak_bot'] - P['peak_top']) * vv + P['lip'] * lipv - P['bg']
+    pk = node(net, 'remap', 'peak_along', [v], inputmin=-0.5, inputmax=0.5, outputmin=0, outputmax=1, useramp=1)
+    pk.parm('ramp').set(ramp([(i / (n - 1), peak(1 - i / (n - 1))) for i in range(n)]))
+    tile = node(net, 'blend', 'tile_height', [s, pk], mode=5)     # multiply
+    masked = node(net, 'blend', 'in_tiles', [tile, (lay, 0)], mode=5)
+    h = node(net, 'remap', 'HEIGHT_BASE', [masked], inputmin=0, inputmax=1, outputmin=P['bg'], outputmax=1 + P['bg'], useramp=0)
+    # background: the straight dark tiles under the gaps, then the leaves on top of them
+    under = node(net, 'tilepattern', 'layout_under', patterntype=0, patternmode=1, stackbond_rows=P['rows'],
+                 stackbond_cols=P['cols'], doinset=0, draw=2, gradienttype=1)
+    under_h = node(net, 'remap', 'under_ramp', [(under, 0)], inputmin=0, inputmax=1,
+                   outputmin=P['under_bot'], outputmax=P['under_top'], useramp=0)
+    leaves = node(net, 'fractalnoise', 'leaves', elementsize=P['leaf_size'], elementscaley=P['leaf_stretch'], offx=P['leaf_seed'])
+    leaf_h = node(net, 'remap', 'leaf_bumps', [(leaves, 0)], inputmin=0, inputmax=1,
+                  outputmin=P['leaf_amp'], outputmax=-P['leaf_amp'], useramp=0)
+    bg = node(net, 'blend', 'background', [under_h, leaf_h], mode=3)          # add
+    tiles_h = node(net, 'blend', 'tiles_on_bg', [bg, h], mode=12)            # maximum
+    # chips: some tiles, a voronoi cut in the middle of the tile, lowered to the concrete level
+    rnd = node(net, 'randommono', 'tile_random', [(lay, 1), None, None, None, (lay, 1)])   # the tile id feeds the SEED input
+    sel = node(net, 'remap', 'chip_tiles', [rnd], op=1, threshold=1 - P['chip_ratio'])
+    band = node(net, 'remap', 'chip_band', [v], inputmin=-0.5, inputmax=0.5, useramp=1)
+    band.parm('ramp').set(ramp([(0, 0), (0.25, 1), (0.8, 1), (1, 0)]))
+    cells = node(net, 'cellularnoise', 'chip_cells', elementsize=P['chip_cell'], offx=P['chip_seed'])
+    crand = node(net, 'randommono', 'chip_cell_random', [(cells, 3), None, None, None, (cells, 3)])   # whole cells, not their borders
+    cut = node(net, 'remap', 'chip_cut', [crand], op=1, threshold=P['chip_cut'])
+    m0 = node(net, 'blend', 'chip_m0', [sel, (lay, 0)], mode=5)            # only inside tiles (v is 0 outside)
+    m1 = node(net, 'blend', 'chip_m1', [m0, band], mode=5)
+    m2 = node(net, 'blend', 'chip_mask', [m1, cut], mode=5)
+    dent = node(net, 'remap', 'chip_dent', [m2], outputmin=0, outputmax=P['chip_depth'], useramp=0)
+    chipped = node(net, 'blend', 'chipped', [tiles_h, dent], mode=4)         # subtract
+    # moss: sparse round dots
+    dots = node(net, 'fractalnoise', 'moss_dots', elementsize=P['moss_cell'], offx=5.0)
+    dot = node(net, 'remap', 'moss_dot', [dots], op=1, threshold=P['moss_cut'])
+    area = node(net, 'fractalnoise', 'moss_area', elementsize=0.15)
+    areab = node(net, 'remap', 'moss_where', [area], op=1, threshold=P['moss_density'])
+    moss = node(net, 'blend', 'moss_mask', [dot, areab], mode=5)
+    mossh = node(net, 'remap', 'moss_bump', [moss], outputmin=0, outputmax=P['moss_height'], useramp=0)
+    mossed = node(net, 'blend', 'mossed', [chipped, mossh], mode=3)
+    grain = node(net, 'fractalnoise', 'grain', elementsize=P['grain_size'], amp=P['grain_amp'], center=0)
+    full = node(net, 'blend', 'height_core', [mossed, grain], mode=3)
+    full.setDisplayFlag(True)
+
+    def rgb(hexa):
+        # the colours are measured in sRGB; Copernicus ramps and constants work in LINEAR. / FR : sRGB mesure -> lineaire
+        hexa = hexa.lstrip('#'); c = [int(hexa[i:i + 2], 16) / 255 for i in (0, 2, 4)]
+        return tuple(x / 12.92 if x <= 0.04045 else ((x + 0.055) / 1.055) ** 2.4 for x in c)
+    def colorramp(stops):
+        return hou.Ramp([hou.rampBasis.Linear] * len(stops), [p for p, _ in stops], [rgb(c) for _, c in stops])
+    # BASE COLOR: tile variation (per tile + lime deposits), background, then chips and moss on top
+    lime = node(net, 'fractalnoise', 'lime_noise', elementsize=P['lime_size'], offx=11.0)
+    limem = node(net, 'remap', 'lime_mask', [lime], inputmin=P['lime_cut'] - 0.15, inputmax=P['lime_cut'], useramp=0)
+    tvar = node(net, 'blend', 'tile_variation', [rnd, limem], mode=12)         # max(per tile, lime)
+    tcol = node(net, 'monotorgb', 'tile_color', [tvar])
+    tcol.parm('ramp').set(colorramp([(0, P['tile_dark']), (0.55, P['tile_mid']), (1, P['tile_lime'])]))
+    bcol = node(net, 'monotorgb', 'bg_color', [(leaves, 0)])
+    bcol.parm('ramp').set(colorramp([(0, P['bg_dark']), (1, P['bg_light'])]))
+    c1 = node(net, 'blend', 'color_tiles', [bcol, tcol, (lay, 0)], mode=0)
+    conc = node(net, 'constant', 'concrete_color', signature='f3'); conc.parmTuple('f3').set(rgb(P['concrete']))
+    c2 = node(net, 'blend', 'color_chips', [c1, conc, m2], mode=0)
+    mcol = node(net, 'constant', 'moss_color', signature='f3'); mcol.parmTuple('f3').set(rgb(P['moss_col']))
+    base = node(net, 'blend', 'basecolor_core', [c2, mcol, moss], mode=0)
+    # ROUGHNESS
+    rt = node(net, 'remap', 'rough_tiles', [tvar], outputmin=P['rough_tile'] - P['rough_var'], outputmax=P['rough_tile'] + P['rough_var'], useramp=0)
+    rbg = node(net, 'remap', 'rough_bg', [(leaves, 0)], outputmin=P['rough_bg'], outputmax=P['rough_bg'], useramp=0)
+    r1 = node(net, 'blend', 'rough_mix', [rbg, rt, (lay, 0)], mode=0)
+    rc = node(net, 'remap', 'rough_chip_v', [m2], outputmin=P['rough_chip'], outputmax=P['rough_chip'], useramp=0)
+    r2 = node(net, 'blend', 'rough_chips', [r1, rc, m2], mode=0)
+    rm = node(net, 'remap', 'rough_moss_v', [moss], outputmin=P['rough_moss'], outputmax=P['rough_moss'], useramp=0)
+    rough = node(net, 'blend', 'roughness_core', [r2, rm, moss], mode=0)
+    # DETAILS: every entry of RoofDetailsV2.DETAILS adds height, colour and roughness on top of the cores
+    import importlib.util
+    spec = importlib.util.spec_from_file_location('roof_details', '/Users/zenray/Downloads/materials-copernicus-exercize/Scripts/RoofDetailsV2.py')
+    RD = importlib.util.module_from_spec(spec); spec.loader.exec_module(RD)
+    gaps = node(net, 'remap', 'gaps_mask', [(lay, 0)], outputmin=1, outputmax=0, useramp=0)
+    curv = node(net, 'curvature', 'curv_core', [full])
+    curvn = node(net, 'remap', 'curv_norm', [curv], useramp=0)
+    curvn.parm('computerange').pressButton()
+    eng = RD.Engine(net, dict(layout=lay, v=v, across=x, tiles=(lay, 0), gaps=gaps, chips=m2, curv=curvn))
+    h_d, c_d, r_d = eng.apply(full, base, rough)
+    full = node(net, 'null', 'HEIGHT', [h_d]); base = node(net, 'null', 'BASECOLOR', [c_d]); rough = node(net, 'null', 'ROUGHNESS', [r_d])
+    full.setDisplayFlag(True)
+    # NORMAL and AO from the final height
+    nrm = node(net, 'heighttonormal', 'NORMAL', [full], scale=P['normal_scale'])   # already encoded 0..1
+    ao = node(net, 'heighttoambientocclusion', 'AO', [full], viewradius=P['ao_radius'])
+    # exports, one ROP per map
+    import os; os.makedirs(P['out_dir'], exist_ok=True)
+    for name, src in (('height', full), ('basecolor', base), ('roughness', rough), ('normal', nrm), ('ao', ao)):
+        rop = node(net, 'rop_image', f'export_{name}')
+        rop.parm('coppath').set(src.path())
+        rop.parm('copoutput').set(f"{P['out_dir']}/V2_{name}.png")
+        rop.parm('setres').set(1); rop.parm('res1').set(P['out_res']); rop.parm('res2').set(P['out_res'])
+        # data maps must be written RAW: an RGB layer is otherwise converted to sRGB (normal 0.5 -> 186).
+        # FR : les cartes de donnees s'ecrivent en RAW, sinon la normale est gammee.
+        rop.parm('colorconversion').set('ocio' if name == 'basecolor' else 'raw')
+    net.layoutChildren()
+    return full
+
+def export_all():
+    net = hou.node(NET)
+    for c in net.children():
+        if c.name().startswith('export_'): c.parm('execute').pressButton()
+
+if __name__ in ('__main__', 'builtins') or True:
+    OUT = build()
+    exec(open('/Users/zenray/Downloads/materials-copernicus-exercize/Scripts/TidyRoofTilesV2.py').read())   # keep the tidy layout after every rebuild

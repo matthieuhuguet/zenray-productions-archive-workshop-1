@@ -1,0 +1,20 @@
+#!/bin/zsh
+EX=/Users/zenray/Downloads/materials-copernicus-exercize
+FB=$EX/feedback-hermes.md
+RUN=0
+while kill -0 64339 2>/dev/null; do sleep 60; done
+while [ $RUN -lt 5 ]; do
+  if tail -n 30 "$FB" | grep -q "EQUIVALENCE 5 MAPS"; then
+    echo "EQUIVALENCE TOTALE : les 5 maps sont faites, voir $FB"
+    exit 0
+  fi
+  if tail -n 30 "$FB" | grep -q "BLOCAGE DEFINITIF"; then
+    echo "BLOCAGE : deux runs sur le meme ecart, arbitrage Matthieu requis, voir $FB"
+    exit 0
+  fi
+  RUN=$((RUN + 1))
+  echo "$(date '+%H:%M') relance $RUN" >> "$FB"
+  hermes chat --provider meta-ai --model muse-spark-1.3 -q "$(cat $EX/NIGHT_PROMPT_HERMES.md $EX/RESUME_ADDENDUM.md)"
+  sleep 20
+done
+echo "WATCHER FINI : 5 relances sans equivalence, voir $FB"

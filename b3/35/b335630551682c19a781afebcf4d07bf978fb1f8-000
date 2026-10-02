@@ -1,0 +1,15 @@
+# materials-copernicus-exercize, rangement du 2026-09-24
+
+| Dossier ou fichier | Contenu |
+|---|---|
+| `FEEDBACK.md` | suivi du chantier, chaque prompt |
+| `Tiles_V2.hip(lc)` | la scene Copernicus (716 noeuds, rangee par familles) + `/obj/SM_LD_Cyclorama` |
+| `Scripts/` | construction, details, rangement, lookdev, defile des layers, comparateurs |
+| `textures/` | cartes exportees `V2_*.png` (lues par Unreal) |
+| `ref_*`, `pablo-blanes-*` | references ; restent a la racine, les noeuds `REF_*` du hip les lisent ici |
+| `10-renders/` | lookdevs Karma et Unreal, planches de comparaison V2 a V6 |
+| `90-archive/2026-09-19-hermes/` | les iterations Hermes du 19 septembre, rien de supprime |
+| `90-archive/2026-09-19-tests/` | essais du 19 septembre (cmp, karma, probe, env) |
+| `tmp-layer/`, `tmp-font-fire-emblem-asset/` | chantiers voisins, references ailleurs, non touches |
+
+Le short de ce materiau se prepare dans `~/.claude/tmp/tmp-short-roof-tiles-copernicus/`.

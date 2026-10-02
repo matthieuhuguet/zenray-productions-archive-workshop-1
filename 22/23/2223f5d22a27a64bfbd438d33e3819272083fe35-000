@@ -1,0 +1,90 @@
+# 2026-09-24 : lookdev of the Copernicus roof tiles on a cube and a plane, textures LIVE through op: paths.
+# Change a node in /obj/Tiles_V2 and the material follows, no export needed.
+# FR : lookdev des tuiles sur un cube et un plan, textures reliees EN DIRECT au graphe Copernicus.
+import hou
+
+COP = '/obj/Tiles_V2'
+L = {                                   # the parameter interface, one place
+    'live': True,
+    'cube_size': 2.0, 'plane_size': 4.0, 'plane_x': 3.5,
+    'disp_scale': 0.08, 'disp_offset': -0.42,     # offset = - mean height, so the surface stays in place
+    'normal_scale': 1.0, 'uv_repeat': 1.0,
+    'sun_intensity': 3.0, 'sun_angle': (-35, 40, 0), 'dome_intensity': 0.6,
+    'cam_pos': (6.5, 4.6, 10.5), 'cam_rot': (-20, 22, 0),
+    'render': '/Users/zenray/Downloads/materials-copernicus-exercize/10-renders/lookdev_V2.png', 'render_res': (1280, 720),
+}
+
+# live=True : op: paths, the viewport and the Karma viewport follow the graph instantly.
+# live=False: the exported PNGs, required by an out-of-process render (husk cannot read op:).
+# FR : live=True suit le graphe en direct ; live=False lit les PNG exportes, obligatoire pour husk.
+def op(name):
+    if L.get('live', True):
+        return f'op:{COP}/FINAL_{name}'
+    return f"/Users/zenray/Downloads/materials-copernicus-exercize/textures/V2_{name}.png"
+
+def make(parent, kind, name):
+    n = parent.node(name)
+    if n: n.destroy()
+    return parent.createNode(kind, name)
+
+# Box projection along the dominant axis of each face: one full UV square per cube face.
+# FR : projection boite selon l'axe dominant de chaque face.
+UV_VEX = '''
+vector n = abs(prim_normal(0, @primnum, {0.5, 0.5}));
+vector p = (@P - getbbox_center(0)) / chf("size") + 0.5;
+vector2 uv = n.x >= n.y && n.x >= n.z ? set(p.z, p.y) : (n.y >= n.z ? set(p.x, p.z) : set(p.x, p.y));
+v@uv = set(uv.x, uv.y, 0) * chf("repeat");
+'''
+
+def uv_box(geo, name, src, size, repeat):
+    w = geo.createNode('attribwrangle', name); w.setInput(0, src)
+    w.parm('class').set('vertex'); w.parm('snippet').set(UV_VEX)
+    w.addSpareParmTuple(hou.FloatParmTemplate('size', 'Size', 1, default_value=(size,)))
+    w.addSpareParmTuple(hou.FloatParmTemplate('repeat', 'Repeat', 1, default_value=(repeat,)))
+    return w
+
+def build():
+    # material
+    mat = make(hou.node('/mat'), 'principledshader::2.0', 'M_RoofTiles_V2')
+    s = mat.parm
+    s('basecolor_useTexture').set(1); s('basecolor_texture').set(op('basecolor')); s('basecolor_textureColorSpace').set('linear' if L.get('live', True) else 'auto')   # the PNG basecolor is sRGB
+    s('basecolorr').set(1); s('basecolorg').set(1); s('basecolorb').set(1)
+    s('rough').set(1.0); s('rough_useTexture').set(1); s('rough_texture').set(op('roughness')); s('rough_textureColorSpace').set('linear')
+    s('baseBumpAndNormal_enable').set(1); s('baseBumpAndNormal_type').set('normal'); s('baseNormal_texture').set(op('normal'))
+    s('baseNormal_colorspace').set('linear'); s('baseNormal_scale').set(L['normal_scale'])
+    s('dispTex_enable').set(1); s('dispTex_texture').set(op('height')); s('dispTex_colorSpace').set('linear')
+    s('dispTex_scale').set(L['disp_scale']); s('dispTex_offset').set(L['disp_offset'])
+    # geometry: a cube (one UV square per face) and a plane
+    geo = make(hou.node('/obj'), 'geo', 'LookDev_Tiles')
+    box = geo.createNode('box', 'cube'); box.parm('scale').set(L['cube_size'])
+    uvc = uv_box(geo, 'uv_per_face', box, L['cube_size'], L['uv_repeat'])
+    grid = geo.createNode('grid', 'plane'); grid.parmTuple('size').set((L['plane_size'], L['plane_size']))
+    grid.parm('rows').set(2); grid.parm('cols').set(2); grid.parm('tx').set(L['plane_x']); grid.parm('ty').set(-L['cube_size'] / 2)
+    uvp = uv_box(geo, 'uv_plane', grid, L['plane_size'], L['uv_repeat'] * L['plane_size'] / L['cube_size'])
+    merge = geo.createNode('merge', 'both'); merge.setInput(0, uvc); merge.setInput(1, uvp)
+    out = geo.createNode('null', 'OUT'); out.setInput(0, merge); out.setDisplayFlag(True); out.setRenderFlag(True)
+    geo.parm('shop_materialpath').set(mat.path())
+    geo.layoutChildren()
+    # Solaris: import, lights, camera, Karma
+    stage = hou.node('/stage')
+    for c in ('lookdev_import', 'lookdev_sun', 'lookdev_dome', 'lookdev_cam', 'lookdev_karma', 'lookdev_render'):
+        n = stage.node(c)
+        if n: n.destroy()
+    imp = stage.createNode('sceneimport::2.0', 'lookdev_import') if hou.lopNodeTypeCategory().nodeType('sceneimport::2.0') else stage.createNode('sceneimport', 'lookdev_import')
+    imp.parm('objects').set(geo.path())
+    sun = stage.createNode('distantlight::2.0', 'lookdev_sun'); sun.setInput(0, imp)
+    sun.parm('xn__inputsintensity_i0a').set(L['sun_intensity']); sun.parmTuple('r').set(L['sun_angle'])
+    dome = stage.createNode('domelight::3.0', 'lookdev_dome'); dome.setInput(0, sun)
+    dome.parm('xn__inputsintensity_i0a').set(L['dome_intensity'])
+    cam = stage.createNode('camera', 'lookdev_cam'); cam.setInput(0, dome)
+    cam.parmTuple('t').set(L['cam_pos']); cam.parmTuple('r').set(L['cam_rot'])
+    krs = stage.createNode('karmarenderproperties', 'lookdev_karma'); krs.setInput(0, cam)
+    krs.parm('camera').set('/cameras/lookdev_cam')
+    krs.parm('engine').set('xpu')
+    rop = stage.createNode('usdrender_rop', 'lookdev_render'); rop.setInput(0, krs)
+    rop.parm('outputimage').set(L['render'])
+    krs.setDisplayFlag(True)
+    stage.layoutChildren()
+    return rop
+
+ROP = build()

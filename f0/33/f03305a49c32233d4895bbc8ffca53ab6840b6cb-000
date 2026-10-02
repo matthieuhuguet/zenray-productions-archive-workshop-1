@@ -1,0 +1,25 @@
+# 2026-09-19 : compare a rendered height against the reference column by grey bands.
+# FR : compare une height rendue a la colonne de reference, bande de gris par bande de gris.
+import sys
+from PIL import Image
+import numpy as np
+
+BANDS = [(0.0, 0.20), (0.20, 0.35), (0.35, 0.50), (0.50, 0.62), (0.62, 1.01)]
+
+def stats(path):
+    a = np.asarray(Image.open(path).convert('L'), float) / 255.0
+    bands = [float(((a >= lo) & (a < hi)).mean() * 100) for lo, hi in BANDS]
+    grad = float((np.abs(np.diff(a, axis=0)).mean() + np.abs(np.diff(a, axis=1)).mean()) / 2)
+    return dict(mean=a.mean(), sd=a.std(), bands=bands, grad=grad)
+
+ref, test = sys.argv[1], sys.argv[2]
+r, t = stats(ref), stats(test)
+print('bande        REF    NOUS   ecart')
+names = ['<0.20 creux', '0.20-0.35', '0.35-0.50', '0.50-0.62', '>0.62 crete']
+score = 0.0
+for n, rv, tv in zip(names, r['bands'], t['bands']):
+    print('%-12s %5.1f  %5.1f  %+6.1f' % (n, rv, tv, tv - rv))
+    score += abs(tv - rv)
+print('moyenne      %5.3f  %5.3f  %+6.3f' % (r['mean'], t['mean'], t['mean'] - r['mean']))
+print('gradient     %5.4f %5.4f %+6.4f' % (r['grad'], t['grad'], t['grad'] - r['grad']))
+print('SCORE (somme des ecarts de bandes, 0 = parfait) : %.1f' % score)

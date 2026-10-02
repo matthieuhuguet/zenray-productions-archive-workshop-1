@@ -1,0 +1,115 @@
+# 2026-09-24 : tidy the Tiles_V2 network by map category, with a FINAL_MAPS column (ours next to the reference).
+# FR : range le reseau par categorie de map ; colonne FINAL_MAPS, la notre a cote de la reference.
+import hou
+
+NET = '/obj/Tiles_V2'
+REF_DIR = '/Users/zenray/Downloads/materials-copernicus-exercize'
+# category title, colour, node names (in flow order)
+CATEGORIES = [
+    ('1  LAYOUT  la grille de tuiles', (0.45, 0.45, 0.50), ['layout', 'u', 'v', 'abs_u', 'half_width', 'layout_under']),
+    ('2  HEIGHT  forme de la tuile', (0.35, 0.52, 0.72), ['across', 'cylinder', 'peak_along', 'tile_height', 'in_tiles', 'HEIGHT_BASE']),
+    ('3  HEIGHT  fond (tuiles cachees, feuilles)', (0.32, 0.45, 0.62), ['under_ramp', 'leaves', 'leaf_bumps', 'background', 'tiles_on_bg']),
+    ('4  HEIGHT  eclats, mousse, grain', (0.28, 0.40, 0.58), ['tile_random', 'chip_tiles', 'chip_m0', 'chip_band', 'chip_cells', 'chip_cell_random', 'chip_cut',
+                                                           'chip_m1', 'chip_mask', 'chip_dent', 'chipped', 'moss_dots', 'moss_dot', 'moss_area', 'moss_where',
+                                                           'moss_mask', 'moss_bump', 'mossed', 'grain', 'height_core']),
+    ('5  BASE COLOR', (0.78, 0.50, 0.40), ['lime_noise', 'lime_mask', 'tile_variation', 'tile_color', 'bg_color', 'color_tiles', 'concrete_color',
+                                          'color_chips', 'moss_color', 'basecolor_core']),
+    ('6  ROUGHNESS', (0.55, 0.55, 0.55), ['rough_tiles', 'rough_bg', 'rough_mix', 'rough_chip_v', 'rough_chips', 'rough_moss_v', 'roughness_core']),
+    ('7  NORMAL et AO', (0.55, 0.45, 0.75), ['NORMAL', 'AO']),
+    ('8  EXPORT', (0.35, 0.35, 0.35), ['export_height', 'export_basecolor', 'export_roughness', 'export_normal', 'export_ao']),
+]
+# Detail families, paint order kept inside each family. A detail absent here lands in "A CLASSER", never lost.
+# FR : familles de details ; un detail absent d'ici tombe dans A CLASSER, jamais perdu.
+DETAIL_FAMILIES = [
+    ('D1  FORME  levres, bords, deformation', (0.40, 0.55, 0.75), ['d01', 'd02', 'd17', 'd25', 'd26', 'd27', 'd28', 'd38', 'd56', 'd65', 'd71']),
+    ('D2  USURE  rayures, fissures, stries', (0.45, 0.50, 0.70), ['d03', 'd04', 'd05', 'd06', 'd07', 'd24', 'd30', 'd46', 'd47', 'd58', 'd64', 'd66', 'd73']),
+    ('D3  ECLATS ET BETON', (0.55, 0.55, 0.60), ['d08', 'd09', 'd10', 'd29', 'd31', 'd35', 'd48', 'd49', 'd61', 'd72']),
+    ('D4  TEINTE DE LA TUILE', (0.80, 0.50, 0.40), ['d11', 'd12', 'd36', 'd37', 'd39', 'd55', 'd57', 'd63']),
+    ('D5  SALISSURES ET DEPOTS', (0.55, 0.45, 0.35), ['d16', 'd20', 'd40', 'd41', 'd45', 'd54', 'd67', 'd68']),
+    ('D6  CREUX  feuilles et litiere', (0.50, 0.40, 0.25), ['d18', 'd19', 'd33', 'd34', 'd50', 'd51', 'd52', 'd53', 'd62']),
+    ('D7  LICHENS', (0.75, 0.70, 0.40), ['d13', 'd23', 'd42', 'd43', 'd44']),
+    ('D8  CHAUX  peinte tard', (0.85, 0.85, 0.80), ['d14', 'd15', 'd59', 'd69']),
+    ('D9  MOUSSE  peinte en dernier', (0.40, 0.60, 0.30), ['d21', 'd22', 'd32', 'd60', 'd70', 'd74']),
+]
+# The *_core nodes belong to their map category (4, 5, 6): claiming them twice stretched those boxes over the net.
+ENGINE_IO = ['gaps_mask', 'curv_core', 'curv_norm', 'HEIGHT', 'BASECOLOR', 'ROUGHNESS']
+FAMILY_ROW_W = 150.0  # network units before a family row wraps / FR : largeur avant retour a la ligne
+FINALS = ['height', 'basecolor', 'roughness', 'normal', 'ao']
+SOURCE = {'height': 'HEIGHT', 'basecolor': 'BASECOLOR', 'roughness': 'ROUGHNESS', 'normal': 'NORMAL', 'ao': 'AO'}
+COL_W, ROW_H = 3.2, 1.1
+
+def tidy():
+    net = hou.node(NET)
+    for b in net.networkBoxes(): b.destroy()
+    # Nothing is ever destroyed here: stray nodes land in the A CLASSER box. / FR : rien n'est supprime.
+    x = 0.0
+    for title, colour, names in CATEGORIES:
+        nodes = [net.node(n) for n in names if net.node(n)]
+        per_col = 10
+        for i, n in enumerate(nodes):
+            n.setPosition(hou.Vector2(x + (i // per_col) * COL_W, -(i % per_col) * ROW_H))
+            n.setColor(hou.Color(colour))
+        box = net.createNetworkBox(); box.setComment(title); box.setColor(hou.Color(colour))
+        for n in nodes: box.addItem(n)
+        box.fitAroundContents()
+        x += COL_W * (1 + (len(nodes) - 1) // per_col) + 1.2
+    # DETAILS: one box per family, a grid of boxes under the main row (2026-09-24, one 74-column box was unreadable).
+    # FR : une boite par famille de details, en grille sous la rangee principale ; rien n'est supprime.
+    import re
+    def detail_of(name):
+        m = re.match(r'(d\d\d)_', name); return m.group(1) if m else None
+    by_id = {}
+    for c in net.children():
+        d = detail_of(c.name())
+        if d: by_id.setdefault(d, []).append(c)
+    main_bottom = min(c.position()[1] for c in net.children() if c.parentNetworkBox() is not None)
+    fx0, fy = 0.0, main_bottom - 4.0
+    gx, row_h = fx0, 0.0
+    placed = set()
+    def family_box(title, colour, columns):
+        nonlocal gx, fy, row_h
+        cols = [col for col in columns if col]
+        if not cols: return
+        width = len(cols) * COL_W
+        if gx > fx0 and gx + width > FAMILY_ROW_W: gx, fy, row_h = fx0, fy - row_h - 4.0, 0.0
+        box = net.createNetworkBox(); box.setComment(title); box.setColor(hou.Color(colour))
+        for j, col in enumerate(cols):
+            for i, c in enumerate(sorted(col, key=lambda n: n.name())):
+                c.setPosition(hou.Vector2(gx + j * COL_W, fy - i * ROW_H)); c.setColor(hou.Color(colour))
+                box.addItem(c); placed.add(c.path())
+        box.fitAroundContents()
+        row_h = max(row_h, max(len(col) for col in cols) * ROW_H + 1.5)
+        gx += width + 1.5
+    for title, colour, ids in DETAIL_FAMILIES:
+        family_box(f'{title}  ({len([i for i in ids if i in by_id])})', colour, [by_id.pop(i, None) for i in ids])
+    engine = [net.node(n) for n in ENGINE_IO if net.node(n)]
+    family_box('MOTEUR  entrees et sorties des details', (0.40, 0.40, 0.40), [[n] for n in engine])
+    noises = [c for c in net.children() if c.name().startswith('n_')]
+    family_box('BRUITS PARTAGES  par les details', (0.30, 0.30, 0.30), [noises[i:i + 12] for i in range(0, len(noises), 12)])
+    family_box('A CLASSER  details sans famille', (0.85, 0.20, 0.20), list(by_id.values()))
+    loose = [c for c in net.children() if c.parentNetworkBox() is None and c.path() not in placed and not c.name().startswith(('FINAL_', 'REF_'))]
+    family_box('A CLASSER  noeuds hors categorie', (0.85, 0.20, 0.20), [loose[i:i + 12] for i in range(0, len(loose), 12)])
+    x = max(x, 0.0)
+    # FINAL_MAPS: one null per map (click it to view), the reference just beside it
+    fx = x + 1.0
+    final_box = net.createNetworkBox(); final_box.setComment('FINAL MAPS  clique un null pour voir la map, REF a droite')
+    final_box.setColor(hou.Color(0.25, 0.60, 0.40))
+    for i, m in enumerate(FINALS):
+        null = net.node(f'FINAL_{m}') or net.createNode('null', f'FINAL_{m}')
+        null.setInput(0, net.node(SOURCE[m]))
+        null.setPosition(hou.Vector2(fx, -i * 1.6)); null.setColor(hou.Color(0.25, 0.75, 0.45))
+        final_box.addItem(null)
+        refname = 'REF_height' if m == 'height' else f'REF_{m}'
+        ref = net.node(refname)
+        if ref is None and m != 'ao':
+            ref = net.createNode('file', refname); ref.parm('filename').set(f'{REF_DIR}/ref_{m}_square.jpg')
+        if ref is not None:
+            ref.setPosition(hou.Vector2(fx + 3.0, -i * 1.6)); ref.setColor(hou.Color(0.8, 0.3, 0.3))
+            final_box.addItem(ref)
+    final_box.fitAroundContents()
+    for b in net.networkBoxes(): b.fitAroundContents()
+    net.node('FINAL_basecolor').setDisplayFlag(True)
+    return final_box
+
+if True:
+    tidy()

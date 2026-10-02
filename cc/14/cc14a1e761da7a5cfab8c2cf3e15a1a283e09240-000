@@ -1,0 +1,43 @@
+# 2026-09-24 : structural comparison of a height map against the reference, not a histogram.
+# Aligns the two images by circular cross-correlation (the pattern tiles), then reports:
+#   - pixel correlation after alignment (1 = identical structure),
+#   - mean absolute error of the grey levels,
+#   - the mean tile profiles (vertical and horizontal), which is where "ugly" hides.
+# FR : comparaison STRUCTURELLE, alignee, par profils de tuile moyenne.
+import sys, json
+import numpy as np
+from PIL import Image
+
+COLS, ROWS = 10, 8
+
+def load(p, size=1024):
+    return np.asarray(Image.open(p).convert('L').resize((size, size), Image.BILINEAR), float) / 255.0
+
+def align(ref, test):
+    F = np.fft.fft2(ref - ref.mean()) * np.conj(np.fft.fft2(test - test.mean()))
+    c = np.real(np.fft.ifft2(F))
+    dy, dx = np.unravel_index(np.argmax(c), c.shape)
+    return np.roll(np.roll(test, dy, 0), dx, 1), (int(dy), int(dx))
+
+def tile_profiles(a):
+    n = a.shape[0]; cw, rh = n // COLS, n // ROWS
+    col = a[:, :cw * COLS].reshape(n, COLS, cw).mean(axis=(0, 1))          # across a column
+    # vertical: fold rows of the EVEN columns only (odd ones are offset)
+    even = np.concatenate([a[:, i * cw + cw // 4: i * cw + 3 * cw // 4] for i in range(0, COLS, 2)], 1)
+    row = even.mean(1)[:rh * ROWS].reshape(ROWS, rh).mean(0)
+    return col, row
+
+ref = load(sys.argv[1]); test = load(sys.argv[2])
+test_a, shift = align(ref, test)
+corr = float(np.corrcoef(ref.ravel(), test_a.ravel())[0, 1])
+mae = float(np.abs(ref - test_a).mean())
+rc, rr = tile_profiles(ref); tc, tr = tile_profiles(test_a)
+out = {'shift': shift, 'correlation': round(corr, 4), 'mae': round(mae, 4),
+       'across_ref': [round(x, 2) for x in rc[::max(1, len(rc) // 12)]],
+       'across_ours': [round(x, 2) for x in tc[::max(1, len(tc) // 12)]],
+       'down_ref': [round(x, 2) for x in rr[::max(1, len(rr) // 12)]],
+       'down_ours': [round(x, 2) for x in tr[::max(1, len(tr) // 12)]]}
+if len(sys.argv) > 3:
+    side = np.concatenate([ref, test_a, np.abs(ref - test_a) * 2], 1)
+    Image.fromarray((np.clip(side, 0, 1) * 255).astype(np.uint8)).save(sys.argv[3])
+print(json.dumps(out))

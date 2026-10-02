@@ -1,0 +1,15 @@
+# 2026-09-24 : colour statistics of a basecolor by zone (tiles / gaps, from the matching height) + roughness.
+import sys, numpy as np
+from PIL import Image
+def load(p, mode): return np.asarray(Image.open(p).convert(mode).resize((1024, 1024)), float) / 255
+for tag, col, hgt, rgh in (('REF', 'ref_basecolor_square.jpg', 'ref_height_square.jpg', 'ref_roughness_square.jpg'),
+                           ('OUR', 'textures/V2_basecolor.png', 'textures/V2_height.png', 'textures/V2_roughness.png')):
+    c = load(col, 'RGB'); h = load(hgt, 'L'); r = load(rgh, 'L')
+    hsv = np.asarray(Image.open(col).convert('HSV').resize((1024, 1024)), float) / 255
+    tiles = h > np.percentile(h, 45); gaps = h < np.percentile(h, 15)
+    for zn, m in (('tiles', tiles), ('gaps', gaps)):
+        med = np.median(c[m], 0); sat = np.median(hsv[..., 1][m]); val = np.median(hsv[..., 2][m])
+        light = (hsv[..., 2][m] > 0.82).mean() * 100; white = ((hsv[..., 1][m] < 0.15) & (hsv[..., 2][m] > 0.7)).mean() * 100
+        print(f"{tag} {zn:5s} median #{int(med[0]*255):02x}{int(med[1]*255):02x}{int(med[2]*255):02x} sat {sat:.2f} val {val:.2f} "
+              f"lightpx {light:4.1f}% whitish {white:4.1f}% rough med {np.median(r[m]):.2f} sd {r[m].std():.3f}")
+    print(f"{tag} local contrast (sd of luminance, 8px) tiles:", round(float(np.std(c[tiles].mean(1))), 3))

@@ -1,0 +1,21 @@
+# 2026-09-24 : measure the tiles of a mask: count, width at top and bottom, height, column offset.
+import sys, numpy as np
+from PIL import Image
+from scipy import ndimage
+a = np.asarray(Image.open(sys.argv[1]).convert('L'), float) / 255 > 0.5
+lab, n = ndimage.label(a)
+objs = ndimage.find_objects(lab)
+rows = []
+for i, s in enumerate(objs):
+    m = lab[s] == i + 1
+    h, w = m.shape
+    if h < 5: continue
+    top = m[1].sum(); bot = m[-2].sum()
+    rows.append((s[0].start, s[1].start, h, w, int(top), int(bot)))
+rows.sort()
+print('tiles', len(rows), 'image', a.shape)
+for r in rows[:4]: print('y0 x0 h w topW botW', r)
+xs = sorted({r[1] for r in rows}); print('column x0', xs[:6])
+y_by_col = {}
+for r in rows: y_by_col.setdefault(r[1], []).append(r[0])
+print('first y per column', [min(v) for k, v in sorted(y_by_col.items())][:4])

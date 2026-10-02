@@ -1,0 +1,190 @@
+# 2026-09-24 : the DETAIL ENGINE of the roof tiles. One definition, many instances (HDA law):
+# every detail is ONE entry of DETAILS = a mask recipe + what it changes (height, colour, roughness).
+# Adding detail 17, or 64, is adding a line. Details were read on pablo-blanes-render-01.jpg.
+# FR : le moteur de details ; un detail = une ligne (recette de masque + effets hauteur, couleur, rugosite).
+import hou
+
+# Mask recipes. Each term returns a mono layer in [0, 1]; a detail multiplies its terms.
+#   ('noise', size, scalex, scaley, seed, cover, soft)  fractal noise covering `cover` (0-1) of the surface
+#   ('line',  size, scalex, scaley, seed, width)    thin lines: a narrow band around the noise mid value
+#   ('along', [(t, value), ...])                    ramp on the tile length, t=0 bottom lip, t=1 top
+#   ('across', [(x, value), ...])                   ramp across the tile, x=0 axis, x=1 edge
+#   ('tile', ratio, seed)                           a random subset of tiles
+#   ('in_tiles',) / ('in_gaps',)                    inside the tiles / the background between them
+#   ('curv', lo, hi)                                convexity of the height (ridges), soft threshold
+DETAILS = [
+    # --- HEIGHT: shape and wear --------------------------------------------------------------------
+    dict(name='d01_lip_fringe', mask=[('in_tiles',), ('along', [(0, 1), (0.05, 1), (0.09, 0)]), ('noise', 0.004, 0.25, 4.0, 1, 0.45)],
+         height=-0.06, color=('#3b2a22', 0.55), rough=(0.95, 0.5)),
+    dict(name='d02_lip_rim', mask=[('in_tiles',), ('along', [(0, 0), (0.03, 1), (0.07, 0)])], height=0.012),
+    dict(name='d03_striations', mask=[('in_tiles',), ('noise', 0.003, 0.08, 6.0, 2, 0.35)], height=-0.006),
+    dict(name='d04_scratches', mask=[('in_tiles',), ('line', 0.05, 1.0, 0.25, 3, 0.016)], height=-0.022, color=('#ecc1ad', 0.55)),
+    dict(name='d05_scratches_fine', mask=[('in_tiles',), ('line', 0.025, 0.3, 1.0, 4, 0.010)], height=-0.008, color=('#efc8b6', 0.4)),
+    dict(name='d06_cracks', mask=[('in_tiles',), ('line', 0.09, 1.0, 1.0, 5, 0.006), ('noise', 0.15, 1, 1, 6, 0.25)], height=-0.02, color=('#2c1d17', 0.7)),
+    dict(name='d07_pitting', mask=[('in_tiles',), ('noise', 0.0025, 1, 1, 7, 0.06)], height=-0.01, color=('#6a4436', 0.4)),
+    dict(name='d08_edge_chips', mask=[('in_tiles',), ('across', [(0, 0), (0.8, 0), (0.95, 1)]), ('noise', 0.01, 1, 2, 8, 0.25)], height=-0.05, color=('#a9a39b', 0.8)),
+    dict(name='d09_concrete_pores', mask=[('chips',), ('noise', 0.002, 1, 1, 9, 0.5)], height=0.02, color=('#8f8983', 0.6), rough=(0.95, 1)),
+    dict(name='d10_mortar_under_lip', mask=[('in_tiles',), ('along', [(0.9, 0), (0.97, 1), (1, 1)]), ('noise', 0.02, 1, 1, 10, 0.6)], height=0.01, color=('#b8b0a4', 0.75), rough=(0.92, 0.8)),
+    # --- COLOUR: weathering layers -------------------------------------------------------------------
+    dict(name='d11_tile_hue_bright', mask=[('in_tiles',), ('tile', 0.35, 11)], color=('#c56c4e', 0.65)),
+    dict(name='d12_tile_hue_brown', mask=[('in_tiles',), ('tile', 0.18, 12)], color=('#8a5a44', 0.6)),
+    dict(name='d13_lichen_crust_tiles', mask=[('in_tiles',), ('tile', 0.14, 13), ('noise', 0.006, 1, 1, 14, 0.7)], height=0.008, color=('#7d6a3e', 0.8), rough=(0.9, 0.7)),
+    dict(name='d15_lime_specks', mask=[('in_tiles',), ('noise', 0.003, 1, 1, 17, 0.015)], color=('#efe3da', 0.5)),
+    dict(name='d16_overlap_grime', mask=[('in_tiles',), ('along', [(0.75, 0), (0.95, 1), (1, 1)])], color=('#3f2a20', 0.45), rough=(0.9, 0.4)),
+    dict(name='d17_ridge_wear', mask=[('in_tiles',), ('curv', 0.80, 0.92)], color=('#d9967a', 0.35)),
+    dict(name='d18_gap_dirt', mask=[('in_gaps',), ('noise', 0.02, 1, 1, 18, 0.12)], color=('#2e2019', 0.4), rough=(0.95, 0.8)),
+    dict(name='d19_leaves', mask=[('in_gaps',), ('noise', 0.012, 1.6, 0.8, 19, 0.18)], height=0.015, color=('#7a4a2a', 0.85)),
+    dict(name='d20_streaks', mask=[('in_tiles',), ('noise', 0.02, 0.15, 8.0, 20, 0.08)], color=('#5e3f33', 0.35)),
+    dict(name='d23_orange_lichen_gaps', mask=[('in_gaps',), ('noise', 0.012, 1, 1, 23, 0.28)], color=('#c98a3a', 0.85)),
+    dict(name='d24_dust_in_striations', mask=[('in_tiles',), ('noise', 0.003, 0.08, 6.0, 2, 0.12)], color=('#cdbfae', 0.25)),
+    # --- 25 to 64, added 2026-09-24 ------------------------------------------------------------------
+    dict(name='d25_tile_warp', mask=[('in_tiles',), ('noise', 0.12, 1, 1, 25, 0.5, 3.0)], height=0.012),
+    dict(name='d26_tile_sag', mask=[('in_tiles',), ('tile', 0.3, 26)], height=0.01),
+    dict(name='d27_lip_notches', mask=[('in_tiles',), ('along', [(0, 1), (0.06, 1), (0.1, 0)]), ('noise', 0.01, 1, 1, 27, 0.15)], height=-0.045, color=('#b8b0a4', 0.5)),
+    dict(name='d28_top_corner_breaks', mask=[('in_tiles',), ('along', [(0.8, 0), (0.9, 1), (1, 1)]), ('across', [(0, 0), (0.7, 0), (0.85, 1)]), ('noise', 0.02, 1, 1, 28, 0.3)], height=-0.05, color=('#a9a39b', 0.7)),
+    dict(name='d29_large_spall', mask=[('in_tiles',), ('noise', 0.05, 1.3, 1, 29, 0.03)], height=-0.035, color=('#b0a79c', 0.75), rough=(0.93, 0.8)),
+    dict(name='d30_micro_grain', mask=[('in_tiles',), ('noise', 0.0015, 1, 1, 30, 0.5, 2.0)], height=0.004),
+    dict(name='d31_concrete_rubble', mask=[('chips',), ('noise', 0.004, 1, 1, 31, 0.4)], height=0.015, color=('#9c968e', 0.5)),
+    dict(name='d33_gap_twigs', mask=[('in_gaps',), ('line', 0.03, 0.2, 1.0, 34, 0.01)], height=0.012, color=('#5a3a22', 0.8)),
+    dict(name='d34_gap_leaf_layers', mask=[('in_gaps',), ('noise', 0.02, 1.4, 1, 35, 0.3)], height=0.01),
+    dict(name='d35_rim_chips_small', mask=[('in_tiles',), ('across', [(0, 0), (0.85, 0), (0.97, 1)]), ('noise', 0.005, 1, 1, 36, 0.2)], height=-0.02, color=('#c29a88', 0.5)),
+    dict(name='d36_tile_hue_deep_red', mask=[('in_tiles',), ('tile', 0.12, 37)], color=('#a4482f', 0.55)),
+    dict(name='d37_tile_hue_pale', mask=[('in_tiles',), ('tile', 0.15, 38)], color=('#d09a85', 0.5)),
+    dict(name='d38_top_shade', mask=[('in_tiles',), ('along', [(0.6, 0), (1, 1)])], color=('#5b3a2c', 0.25)),
+    dict(name='d39_sun_bleach', mask=[('in_tiles',), ('curv', 0.85, 0.97)], color=('#e3b09a', 0.3)),
+    dict(name='d40_soot_spots', mask=[('in_tiles',), ('noise', 0.01, 1, 1, 40, 0.05)], color=('#3a2a24', 0.45)),
+    dict(name='d41_algae_film_low', mask=[('in_tiles',), ('along', [(0, 1), (0.35, 0)]), ('noise', 0.03, 1, 1, 41, 0.3)], color=('#6f7040', 0.25)),
+    dict(name='d42_yellow_lichen', mask=[('in_tiles',), ('noise', 0.006, 1, 1, 42, 0.01)], color=('#b3a36a', 0.6)),
+    dict(name='d43_white_lichen', mask=[('in_tiles',), ('noise', 0.012, 1, 1, 43, 0.01)], color=('#e8e2d6', 0.7)),
+    dict(name='d44_grey_lichen_crust', mask=[('in_tiles',), ('noise', 0.015, 1, 1, 44, 0.06)], height=0.004, color=('#9a968a', 0.55)),
+    dict(name='d45_rust_stains', mask=[('in_tiles',), ('noise', 0.02, 1, 1, 45, 0.05)], color=('#b5652c', 0.4)),
+    dict(name='d46_water_streak_lines', mask=[('in_tiles',), ('noise', 0.01, 0.12, 6.0, 46, 0.06)], color=('#4d3a30', 0.3)),
+    dict(name='d47_dirt_in_scratches', mask=[('in_tiles',), ('line', 0.05, 1.0, 0.25, 3, 0.006)], color=('#4a3228', 0.45)),
+    dict(name='d48_mortar_variation', mask=[('chips',), ('noise', 0.01, 1, 1, 48, 0.4)], color=('#c9c1b5', 0.5)),
+    dict(name='d49_concrete_dark_pores', mask=[('chips',), ('noise', 0.0025, 1, 1, 49, 0.2)], height=-0.01, color=('#6e6a64', 0.7)),
+    dict(name='d50_gap_deep_shadow', mask=[('in_gaps',)], color=('#241812', 0.15)),
+    dict(name='d51_dry_leaves', mask=[('in_gaps',), ('noise', 0.012, 1.5, 1, 51, 0.22)], height=0.008, color=('#b0763f', 0.85)),
+    dict(name='d52_dark_leaves', mask=[('in_gaps',), ('noise', 0.015, 1.5, 1, 52, 0.10)], height=0.006, color=('#4a2e1c', 0.6)),
+    dict(name='d53_pine_needles', mask=[('in_gaps',), ('line', 0.02, 1.0, 0.15, 53, 0.008)], height=0.005, color=('#6b4a2a', 0.7)),
+    dict(name='d54_top_dust', mask=[('in_tiles',), ('along', [(0.55, 0), (0.8, 1)]), ('noise', 0.01, 1, 1, 54, 0.4)], color=('#cdb9a8', 0.2), rough=(0.92, 0.5)),
+    dict(name='d55_clay_speckle', mask=[('in_tiles',), ('noise', 0.002, 1, 1, 55, 0.15)], color=('#b06248', 0.3)),
+    dict(name='d56_lip_underside_dark', mask=[('in_tiles',), ('along', [(0, 1), (0.025, 0)])], color=('#2a1a14', 0.55)),
+    dict(name='d57_wet_patches', mask=[('in_tiles',), ('noise', 0.03, 1, 1, 57, 0.06)], color=('#6a3d2e', 0.2), rough=(0.55, 0.8)),
+    dict(name='d58_polished_ridges', mask=[('in_tiles',), ('curv', 0.9, 1.0)], rough=(0.6, 0.6)),
+    dict(name='d59_lime_specks_rough', mask=[('in_tiles',), ('noise', 0.003, 1, 1, 17, 0.04)], rough=(0.9, 0.8)),
+    dict(name='d61_concrete_rough', mask=[('chips',)], rough=(0.97, 0.9)),
+    dict(name='d62_leaf_gloss', mask=[('in_gaps',), ('noise', 0.012, 1.5, 1, 51, 0.1)], rough=(0.6, 0.7)),
+    dict(name='d63_micro_rough', mask=[('in_tiles',), ('noise', 0.004, 1, 1, 63, 0.5, 2.0)], rough=(0.68, 0.35)),
+    dict(name='d64_scratch_gloss', mask=[('in_tiles',), ('line', 0.025, 0.3, 1.0, 4, 0.006)], rough=(0.62, 0.6)),
+    # --- 65 to 74, final pass 2026-09-24, read on renders 01, 03, 04, 05 --------------------------------
+    dict(name='d65_jagged_lip_silhouette', mask=[('in_tiles',), ('along', [(0, 1), (0.04, 1), (0.08, 0)]), ('noise', 0.012, 1, 0.5, 65, 0.3, 0.3)], height=-0.09, color=('#2a1a14', 0.6)),
+    dict(name='d66_horizontal_cracks', mask=[('in_tiles',), ('line', 0.06, 0.25, 1.0, 66, 0.006), ('noise', 0.2, 1, 1, 67, 0.4)], height=-0.018, color=('#2c1d17', 0.6)),
+    dict(name='d67_grey_crust_tiles', mask=[('in_tiles',), ('tile', 0.15, 68), ('noise', 0.01, 1, 1, 69, 0.8, 2.0)], height=0.005, color=('#7b7560', 0.7), rough=(0.92, 0.7)),
+    dict(name='d68_bottom_dirt_gradient', mask=[('in_tiles',), ('along', [(0, 1), (0.3, 0)])], color=('#6b4636', 0.3)),
+    dict(name='d70_gap_moss_dark', mask=[('in_gaps',), ('noise', 0.015, 1, 1, 71, 0.08)], height=0.01, color=('#4f5226', 0.6), rough=(0.97, 0.8)),
+    dict(name='d71_tile_flank_shade', mask=[('in_tiles',), ('across', [(0, 0), (0.8, 0), (1, 1)])], color=('#5e3a2c', 0.3)),
+    dict(name='d72_concrete_blue_grey', mask=[('chips',), ('noise', 0.03, 1, 1, 72, 0.5)], color=('#9fa3a2', 0.35)),
+    dict(name='d73_scratch_network_light', mask=[('in_tiles',), ('line', 0.035, 0.6, 0.6, 73, 0.008)], height=-0.006, color=('#f1c9b5', 0.45)),
+    # --- lime late: a veil on top of the weathering, under the moss (2026-09-24, measured) ---
+    dict(name='d14_lime_veil', mask=[('in_tiles',), ('noise', 0.04, 0.45, 2.6, 15, 0.30, 1.6), ('noise', 0.006, 1, 1, 16, 0.75, 2.0)], color=('#e6dad3', 0.72), rough=(0.85, 0.5)),
+    dict(name='d69_lime_powder_top', mask=[('in_tiles',), ('along', [(0.45, 0), (0.75, 1)]), ('noise', 0.06, 1, 1.5, 70, 0.4, 1.5)], color=('#e3d4ca', 0.55)),
+    # --- moss LAST: it grows on top of every other layer (2026-09-24, measured: painted earlier it was shredded) ---
+    dict(name='d22_moss_rim', mask=[('in_tiles',), ('noise', 0.08, 1, 1, 70, 0.30, 1.0), ('noise', 0.03, 1, 1, 21, 0.52, 0.15)], color=('#4a4428', 0.8)),
+    dict(name='d21_moss_clumps', mask=[('in_tiles',), ('noise', 0.08, 1, 1, 70, 0.30, 1.0), ('noise', 0.03, 1, 1, 21, 0.42, 0.15)], height=0.045, color=('#6f653f', 0.95), rough=(0.97, 1)),
+    dict(name='d32_moss_cushions', mask=[('in_tiles',), ('noise', 0.08, 1, 1, 70, 0.30, 1.0), ('noise', 0.03, 1, 1, 21, 0.32, 1.2)], height=0.03, rough=(0.98, 1)),
+    dict(name='d60_moss_wet_core', mask=[('in_tiles',), ('noise', 0.08, 1, 1, 70, 0.30, 1.0), ('noise', 0.03, 1, 1, 21, 0.18, 0.15)], color=('#5a5232', 0.7), rough=(0.99, 1)),
+    dict(name='d74_moss_dots_near_lips', mask=[('in_tiles',), ('along', [(0, 1), (0.25, 0)]), ('noise', 0.008, 1, 1, 74, 0.025, 0.2)], height=0.02, color=('#8c8a3c', 0.9), rough=(0.97, 1)),
+]
+P = {'detail_samples': 8}
+NOISE_SD = 0.073   # measured on the fractal noise of this graph, 2026-09-24
+
+
+def hexlin(h):
+    h = h.lstrip('#'); c = [int(h[i:i + 2], 16) / 255 for i in (0, 2, 4)]
+    return tuple(x / 12.92 if x <= 0.04045 else ((x + 0.055) / 1.055) ** 2.4 for x in c)
+
+
+class Engine:
+    def __init__(self, net, ctx):
+        self.net = net; self.ctx = ctx   # ctx: layout, v, abs_x, tiles_mask, gaps_mask, chips_mask, height
+        self.cache = {}
+
+    def mk(self, kind, name, inputs=(), **parms):
+        n = self.net.node(name) or self.net.createNode(kind, name)
+        for i, src in enumerate(inputs):
+            if src is not None:
+                n.setInput(i, src[0] if isinstance(src, tuple) else src, src[1] if isinstance(src, tuple) else 0)
+        for k, v in parms.items():
+            n.parm(k).set(v)
+        return n
+
+    def ramp(self, n, pts):
+        n.parm('ramp').set(hou.Ramp([hou.rampBasis.Linear] * len(pts), [p for p, _ in pts], [v for _, v in pts]))
+
+    def term(self, dname, i, t):
+        key = (dname, i)
+        kind = t[0]
+        base = f'{dname}_t{i}'
+        if kind == 'in_tiles': return self.ctx['tiles']
+        if kind == 'in_gaps': return self.ctx['gaps']
+        if kind == 'chips': return self.ctx['chips']
+        if kind in ('noise', 'line'):
+            size, sx, sy, seed = t[1:5]
+            nkey = ('noise', size, sx, sy, seed)
+            if nkey not in self.cache:
+                self.cache[nkey] = self.mk('fractalnoise', f'n_{len(self.cache):02d}_{dname}', elementsize=size,
+                                           elementscalex=sx, elementscaley=sy, offx=seed * 13.7, offy=seed * 7.3)
+            src = self.cache[nkey]
+            r = self.mk('remap', base, [src], inputmin=0, inputmax=1, outputmin=0, outputmax=1, useramp=1)
+            if kind == 'noise':
+                # coverage -> threshold on the measured distribution (mean 0.5, sd 0.073). / FR : couverture -> seuil
+                from statistics import NormalDist
+                cov, soft = t[5], (t[6] if len(t) > 6 else 0.25)
+                lo = 0.5 + NOISE_SD * NormalDist().inv_cdf(min(max(1 - cov, 1e-4), 1 - 1e-4))
+                hi = lo + soft * NOISE_SD
+                self.ramp(r, [(0, 0), (max(lo, 0.001), 0), (min(hi, 0.999), 1), (1, 1)])
+            else:
+                w = t[5]
+                self.ramp(r, [(0, 0), (0.5 - w, 0), (0.5, 1), (0.5 + w, 0), (1, 0)])
+            return r
+        if kind == 'along':        # t = v + 0.5 : 1 at the top, 0 at the bottom lip
+            r = self.mk('remap', base, [self.ctx['v']], inputmin=-0.5, inputmax=0.5, useramp=1)
+            self.ramp(r, t[1]); return r
+        if kind == 'across':
+            r = self.mk('remap', base, [self.ctx['across']], inputmin=0, inputmax=1, useramp=1)
+            self.ramp(r, t[1]); return r
+        if kind == 'tile':
+            ratio, seed = t[1], t[2]
+            rnd = self.mk('randommono', base + '_rnd', [(self.ctx['layout'], 1), None, None, None, (self.ctx['layout'], 1)], seed=seed)
+            return self.mk('remap', base, [rnd], op=1, threshold=1 - ratio)
+        if kind == 'curv':
+            r = self.mk('remap', base, [self.ctx['curv']], inputmin=0, inputmax=1, useramp=1)
+            self.ramp(r, [(0, 0), (t[1], 0), (t[2], 1), (1, 1)]); return r
+        raise ValueError(kind)
+
+    def mask(self, d):
+        terms = [self.term(d['name'], i, t) for i, t in enumerate(d['mask'])]
+        m = terms[0]
+        for i, t in enumerate(terms[1:]):
+            m = self.mk('blend', f"{d['name']}_and{i}", [m, t], mode=5)
+        return self.mk('null', f"{d['name']}_MASK", [m])
+
+    def apply(self, height, color, rough):
+        masks = {d['name']: self.mask(d) for d in DETAILS}
+        for d in DETAILS:
+            m = masks[d['name']]
+            if 'height' in d:
+                amt = self.mk('remap', f"{d['name']}_h", [m], outputmin=0, outputmax=abs(d['height']), useramp=0)
+                height = self.mk('blend', f"{d['name']}_H", [height, amt], mode=3 if d['height'] > 0 else 4)
+        for d in DETAILS:
+            if 'color' in d:
+                hexa, opacity = d['color']
+                c = self.mk('constant', f"{d['name']}_col", signature='f3'); c.parmTuple('f3').set(hexlin(hexa))
+                op = self.mk('remap', f"{d['name']}_op", [masks[d['name']]], outputmin=0, outputmax=opacity, useramp=0)
+                color = self.mk('blend', f"{d['name']}_C", [color, c, op], mode=0)
+            if 'rough' in d:
+                val, opacity = d['rough']
+                rv = self.mk('remap', f"{d['name']}_rv", [masks[d['name']]], outputmin=val, outputmax=val, useramp=0)
+                op = self.mk('remap', f"{d['name']}_rop", [masks[d['name']]], outputmin=0, outputmax=opacity, useramp=0)
+                rough = self.mk('blend', f"{d['name']}_R", [rough, rv, op], mode=0)
+        return height, color, rough

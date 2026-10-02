@@ -1,0 +1,69 @@
+# Exercice : reconstruire la HEIGHT de tuiles canal dans Copernicus, sans VEX
+
+On lit la STRUCTURE de la reference, puis tu rebatis ta propre version. On ne recopie pas les
+fichiers de l auteur, on refait le materiau avec des noeuds, ce qui est tout l interet.
+
+## Ce que la reference contient, mesure et non estime
+
+Mesures prises par autocorrelation sur la colonne height de la planche :
+
+| Mesure | Valeur | Ce que ca veut dire |
+|---|---|---|
+| Periode verticale | 119 px sur 960 | environ 8 tuiles sur la hauteur du carre |
+| Periode horizontale | 190 px sur 1920 | 10 colonnes sur un carre (corrige : la premiere version disait 4, c etait faux) |
+| Rapport d une tuile | 1,25 | la tuile est 1,25 fois plus haute que large |
+
+## Les cinq etages d une height de tuiles
+
+Une height se construit en couches, du plus grand au plus petit. On ne passe a la couche suivante que
+lorsque la precedente est juste, sinon on ne sait plus quel etage produit quel defaut.
+
+| Etage | Ce qu il apporte | Noeuds Copernicus |
+|---|---|---|
+| 1. Le rythme | ou commence et finit chaque tuile | `tilepattern` |
+| 2. Le canal | la forme en demi-cylindre de chaque tuile | `ramp` pilote par la couche UV du tilepattern |
+| 3. Le chevauchement | la marche nette en haut de chaque tuile, l ombre dessous | decalage vertical, `blend` en mode max |
+| 4. La variation | chaque tuile a son niveau et sa teinte propre | couche ID plus `remap` |
+| 5. L usure | eclats, cassures, trous, grain de terre cuite | `fractalnoise`, `cellularnoise`, `blend` |
+
+## Etape 1, le rythme : ce que tu poses maintenant
+
+1. Cree un `copnet` nomme `Cop_M_RoofTiles_01`, resolution 2048 par 2048, precision 32 bits.
+2. Dedans, pose un `tilepattern`.
+3. Regle `Pattern Type` sur **stack bond**, c est l empilement en colonnes droites des tuiles canal,
+   et `Pattern Mode` sur **tile count**.
+4. Passe `Pattern Mode` sur **Tile Count**, puis mets **10 colonnes** et **8 rangees**. Le rapport de 1,25 mesure plus haut te donne des tuiles
+   plus hautes que larges, ce qui est exactement le cas ici.
+5. Regarde les TROIS sorties du noeud : `Mono` est le masque des tuiles, `ID` donne un numero par
+   tuile, `UV` donne des coordonnees locales a chaque tuile, de 0 a 1. Ce sont ces trois sorties qui
+   vont porter tout le reste.
+
+**Verification avant de passer a l etape 2.** Dans la vue Composite, affiche la sortie `Mono` : tu
+dois compter 10 colonnes et 8 rangees, les joints doivent etre des lignes franches et non des flous.
+Si tu ne comptes pas le bon nombre, c est `tile count` qui n est pas actif, pas la resolution.
+
+## Etape 2, en avance pour que tu voies ou on va
+
+Le canal se fabrique avec la sortie `UV` du tilepattern et un `ramp` : la coordonnee horizontale de
+chaque tuile entre dans une rampe en cloche, haute au milieu, basse sur les deux bords. C est cette
+seule courbe qui donne le demi-cylindre, et elle se regle a l oeil sur la reference.
+
+
+## Les sorties du tilepattern, leur vrai nom
+
+Sur le noeud, a droite : `tiles` (type Mono, le masque blanc des tuiles), `id` (un numero par tuile)
+et `uv` (les coordonnees locales de chaque tuile). Pour VOIR une sortie : pose un `null`, branche-le
+sur cette sortie, et mets le flag d affichage sur le null.
+
+## Etape 2, le canal (demi-cylindre), sans VEX
+
+1. Branche un `channelextract` sur la sortie `uv`, et extrais le canal **X** (la largeur de la
+   tuile, de 0 a gauche a 1 a droite).
+2. Branche un `remap` dessus. Dans sa courbe, fais une cloche : 0 en entree 0, 1 en entree 0,5, 0 en
+   entree 1, avec des tangentes douces. Une tuile canal est un demi-cercle : la courbe doit monter
+   vite pres des bords et s aplatir au sommet.
+3. Branche un `blend` en mode **multiply** : la cloche en premier, la sortie `tiles` en second. Les
+   joints restent a zero, chaque tuile devient bombee.
+
+Verification : affiche le blend. Chaque tuile doit etre claire au milieu, sombre sur ses deux bords
+verticaux, et identique a ses voisines. Aucune variation encore : elle arrive a l etape 4.

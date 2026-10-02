@@ -1,0 +1,17 @@
+# 2026-09-24 : moss statistics of a basecolor (hue 35-95, saturation > 0.25): coverage, clump sizes, clustering.
+import sys, numpy as np
+from PIL import Image
+from scipy import ndimage
+im = Image.open(sys.argv[1]).convert('RGB')
+if len(sys.argv) > 2: im = im.resize((int(sys.argv[2]), int(sys.argv[3])))
+c = np.asarray(im.convert('HSV'), float); rgb = np.asarray(im, float)
+h, s, v = c[..., 0] * 360 / 255, c[..., 1] / 255, c[..., 2] / 255
+moss = (h > 35) & (h < 95) & (s > 0.25) & (v > 0.2)
+lab, n = ndimage.label(moss); sizes = ndimage.sum(moss, lab, range(1, n + 1)); big = sizes[sizes > 30]
+# clustering: share of moss inside the 20% most mossy 64px cells
+H, W = moss.shape; k = 64
+cells = moss[:H // k * k, :W // k * k].reshape(H // k, k, W // k, k).mean((1, 3)).ravel()
+top = np.sort(cells)[::-1]; cluster = top[:max(1, len(top) // 5)].sum() / max(top.sum(), 1e-9)
+med = np.median(rgb[moss], 0) if moss.any() else [0, 0, 0]
+print(f"coverage {moss.mean()*100:.2f}%  clumps {len(big)}  median_diam {2*np.sqrt(np.median(big)/np.pi) if len(big) else 0:.1f}px  "
+      f"max_diam {2*np.sqrt(big.max()/np.pi) if len(big) else 0:.1f}px  clustering {cluster:.2f}  colour #{int(med[0]):02x}{int(med[1]):02x}{int(med[2]):02x}")

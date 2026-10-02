@@ -1,0 +1,59 @@
+# 2026-09-24 : walk the Copernicus viewer through every layer of Tiles_V2, for a screen recording (OBS).
+# Three acts: height built step by step, then colour detail by detail, then roughness, normal, AO, final.
+# Non-blocking: an event loop callback flips the display flag, Houdini stays responsive.
+# FR : fait defiler la vue Copernicus layer par layer, pour un enregistrement OBS ; ne bloque pas Houdini.
+import hou, time
+
+NET = '/obj/Tiles_V2'
+T = {'hold_main': 1.6, 'hold_detail': 0.45, 'hold_final': 3.0, 'lead_in': 2.0}  # seconds / FR : secondes par layer
+MAIN_HEIGHT = ['layout', 'across', 'cylinder', 'HEIGHT_BASE', 'tiles_on_bg', 'chipped', 'mossed', 'height_core']
+MAIN_COLOR = ['tile_color', 'color_tiles', 'color_chips', 'basecolor_core']
+MAIN_REST = ['roughness_core', 'ROUGHNESS', 'NORMAL', 'AO']
+
+
+def steps():
+    import sys
+    sys.path.insert(0, '/Users/zenray/Downloads/materials-copernicus-exercize/Scripts')
+    from RoofDetailsV2 import DETAILS
+    net = hou.node(NET)
+    out = [(n, T['hold_main']) for n in MAIN_HEIGHT]
+    out += [(f"{d['name']}_H", T['hold_detail']) for d in DETAILS if 'height' in d]
+    out += [('HEIGHT', T['hold_main'])]
+    out += [(n, T['hold_main']) for n in MAIN_COLOR]
+    out += [(f"{d['name']}_C", T['hold_detail']) for d in DETAILS if 'color' in d]
+    out += [('BASECOLOR', T['hold_main'])]
+    out += [(n, T['hold_main']) for n in MAIN_REST]
+    out += [('FINAL_basecolor', T['hold_final'])]
+    missing = [n for n, _ in out if net.node(n) is None]
+    if missing: raise RuntimeError(f'missing nodes: {missing}')
+    return out
+
+
+class Walk(object):
+    def __init__(self):
+        self.seq = steps(); self.i = -1; self.next_t = time.time() + T['lead_in']; self.log = []
+
+    def show(self, name):
+        n = hou.node(NET).node(name)
+        n.setDisplayFlag(True); n.setSelected(True, clear_all_selected=True)
+        n.cook(force=False)
+
+    def tick(self):
+        if time.time() < self.next_t: return
+        self.i += 1
+        if self.i >= len(self.seq):
+            hou.ui.removeEventLoopCallback(self.tick); hou.session.zr_walk_done = True; return
+        name, hold = self.seq[self.i]
+        self.show(name); self.log.append((round(time.time(), 2), name)); self.next_t = time.time() + hold
+
+
+def start():
+    w = Walk()
+    hou.session.zr_walk = w; hou.session.zr_walk_done = False
+    hou.ui.addEventLoopCallback(w.tick)
+    return len(w.seq), round(T['lead_in'] + sum(h for _, h in w.seq), 1)
+
+
+def stop():
+    w = getattr(hou.session, 'zr_walk', None)
+    if w and w.tick in hou.ui.eventLoopCallbacks(): hou.ui.removeEventLoopCallback(w.tick)

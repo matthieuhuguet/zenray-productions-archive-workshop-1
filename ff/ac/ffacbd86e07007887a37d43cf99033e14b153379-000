@@ -1,0 +1,90 @@
+# Rebuild Matthieu's roof tile height graph from FEEDBACK.md, validated steps 1 to 5b only.
+# Every value below is the one he validated with his own eye, not a default of mine.
+# FR : reconstruit le graphe de height des tuiles depuis FEEDBACK.md, etapes 1 a 5b validees.
+# 2026-09-18 15:40
+import hou
+
+NET = '/obj/Cop_M_RoofTiles_01'
+V = {                                   # validated values, one place
+    'cols': 10, 'rows': 8,
+    'bell': [(0.0, 0.0), (0.5, 1.0), (1.0, 0.0)],
+    'overlap_out_min': 0.55,
+    'tile_level_min': 0.66,
+    'grain_size': 0.015, 'grain_out_min': 0.66,
+    'chip_blur': 0.0033, 'chip_noise_size': 0.05,
+    'chip_step': [(0.0, 0.0), (0.55, 0.0), (0.65, 1.0), (1.0, 1.0)],
+    'chip_mask': 0.5,
+}
+
+
+def ramp(points):
+    return hou.Ramp([hou.rampBasis.Linear] * len(points), [p for p, _ in points], [v for _, v in points])
+
+
+def remap(net, name, src, inmin=None, inmax=None, outmin=0.0, outmax=1.0, points=None, compute=False):
+    r = net.createNode('remap', name)
+    r.setInput(0, src)
+    if compute:
+        r.parm('computerange').pressButton()
+    if inmin is not None:
+        r.parm('inputmin').set(inmin)
+    if inmax is not None:
+        r.parm('inputmax').set(inmax)
+    r.parm('outputmin').set(outmin)
+    r.parm('outputmax').set(outmax)
+    r.parm('useramp').set(1 if points else 0)
+    if points:
+        r.parm('ramp').set(ramp(points))
+    return r
+
+
+def blend(net, name, bg, fg, mode, mask=1.0, fg_out=0):
+    b = net.createNode('blend', name)
+    b.setInput(0, bg)
+    b.setInput(1, fg, fg_out)
+    b.parm('mode').set(mode)
+    b.parm('mask').set(mask)
+    return b
+
+
+def build():
+    obj = hou.node('/obj')
+    old = obj.node('Cop_M_RoofTiles_01')
+    if old is not None:
+        old.setName('Cop_M_RoofTiles_01_before_crash', unique_name=True)
+    net = obj.createNode('copnet', 'Cop_M_RoofTiles_01')
+    # 1. rhythm
+    tp = net.createNode('tilepattern', 'tilepattern1')
+    tp.parm('patterntype').set('stackbond')
+    tp.parm('patternmode').set('tilecount')
+    tp.parm('stackbond_cols').set(V['cols'])
+    tp.parm('stackbond_rows').set(V['rows'])
+    # 2. canal : uv X -> bell -> x tiles
+    ce1 = net.createNode('channelextract', 'channelextract1'); ce1.setInput(0, tp, 2); ce1.parm('channel').set(0)
+    r1 = remap(net, 'remap1', ce1, -1.0, 1.0, points=V['bell'])
+    b1 = blend(net, 'blend1', r1, tp, 'multiply', fg_out=0)
+    # 3. overlap : uv Y -> 0.55..1
+    ce2 = net.createNode('channelextract', 'channelextract2'); ce2.setInput(0, tp, 2); ce2.parm('channel').set(1)
+    r2 = remap(net, 'remap2', ce2, -1.0, 1.0, outmin=V['overlap_out_min'])
+    b2 = blend(net, 'blend2', b1, r2, 'multiply')
+    # 4. one level per tile
+    rm1 = net.createNode('randommono', 'randommono1'); rm1.setInput(4, tp, 1)
+    # Matthieu set the level on the FLOAT RAMP (point 1 value 0.66), not on min/max, which the ramp overrides.
+    rm1.parm('floatramp').set(ramp([(0.0, V['tile_level_min']), (1.0, 1.0)])); rm1.parm('perpixel').set(0)
+    b3 = blend(net, 'blend3', b2, rm1, 'multiply')
+    # 5a. terracotta grain
+    fn1 = net.createNode('fractalnoise', 'fractalnoise1'); fn1.parm('elementsize').set(V['grain_size'])
+    r3 = remap(net, 'remap3', fn1, outmin=V['grain_out_min'], compute=True)
+    b4 = blend(net, 'blend4', b3, r3, 'multiply')
+    # 5b. edge chips
+    bl = net.createNode('blur', 'blur1'); bl.setInput(0, tp, 0); bl.parm('size').set(V['chip_blur'])
+    r4 = remap(net, 'remap4', bl, 0.0, 1.0, points=V['bell'])
+    fn2 = net.createNode('fractalnoise', 'fractalnoise2'); fn2.parm('elementsize').set(V['chip_noise_size'])
+    r5 = remap(net, 'remap5', fn2, outmin=0.0, points=V['chip_step'], compute=True)
+    b5 = blend(net, 'blend5', r4, r5, 'multiply')
+    b6 = blend(net, 'blend6', b4, b5, 'subtract', mask=V['chip_mask'])
+    b6.setDisplayFlag(True)
+    net.layoutChildren()
+    hou.hipFile.save()
+    return {'net': net.path(), 'nodes': len(net.children()),
+            'errors': [(n.name(), n.errors()[:1]) for n in net.children() if n.errors()]}
